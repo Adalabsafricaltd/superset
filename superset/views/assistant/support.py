@@ -60,6 +60,4 @@ class AssistantSupport:
         self.support[viz_type]["controls"] = controls
         with open(os.path.join(os.path.dirname(__file__), "examples.json"), "w") as file:
             json.dump(self.support, file, indent=4)
-            
-    
         return True

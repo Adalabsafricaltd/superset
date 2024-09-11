@@ -38,6 +38,9 @@ import {
 import getFormDataWithExtraFilters from 'src/dashboard/util/charts/getFormDataWithExtraFilters';
 import Chart from 'src/dashboard/components/gridComponents/Chart';
 import { PLACEHOLDER_DATASOURCE } from 'src/dashboard/constants';
+import ChartControlsPeek from 'src/pages/Assistant/ChartControlsPeek';
+import { data } from 'jquery';
+
 
 const EMPTY_OBJECT = {};
 
@@ -121,4 +124,28 @@ function mapDispatchToProps(dispatch) {
   );
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Chart);
+
+// accepts one child component and passes all props to it
+function AssistantChartWrapper(WrappedComponent) {
+
+  return function AssistantChart(props) {
+
+
+    // console.log('AssistantChartWrapper', props);
+    return <>
+      <div
+        style={{
+
+        }}
+      >
+        <ChartControlsPeek {...{
+          form_data: props.formData,
+          datasource: props.datasource,
+        }} />
+        <WrappedComponent {...props} />
+      </div>
+    </>;
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(AssistantChartWrapper(Chart));

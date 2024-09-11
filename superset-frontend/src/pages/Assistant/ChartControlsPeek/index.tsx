@@ -1,4 +1,4 @@
-import { Button, Modal } from "antd";
+import { Button, Modal, Tooltip } from "antd";
 import { getChartControlValues, saveChartExample } from "../assistantUtils";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -11,17 +11,17 @@ function ChartControlsPeek(props: any) {
     console.log('ChartControlsPeek => props:', props)
 
     // ia open state
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const [formDataLcl, setFormDataLcl] = useState(props.form_data);
 
     const handleSaveExample = () => {
         console.log('ChartControlsPeek => handleSaveExample => To be removed')
-        const { controls, form_data } = props;
+        const { controls, form_data, datasource } = props;
         const cleaned_controls = {
             ...controls
         }
         delete cleaned_controls.datasource.user
-        saveChartExample(formDataLcl.viz_type, cleaned_controls, formDataLcl);
+        // saveChartExample(formDataLcl.viz_type, cleaned_controls, formDataLcl);
     };
 
     const handleUpdateData = () => {
@@ -61,10 +61,10 @@ function ChartControlsPeek(props: any) {
         const { selected } = assistant;
         console.log('ChartControlsPeek => handleApplyAssistant: selected', selected)
         console.log('ChartControlsPeek => handleApplyAssistant: datasource', controls.datasource.datasource)
-        
-        const formData = await getChartControlValues( selected.llm_optimized, selected.viz_type, controls.datasource.datasource);
+
+        const formData = await getChartControlValues(selected.llm_optimized, selected.viz_type, controls.datasource.datasource);
         // Update current form data with the assistant form data .. new data may not have all the keys
-        const newFormData:QueryFormData  = {
+        const newFormData: QueryFormData = {
             ...formDataLcl,
             ...formData
         };
@@ -73,12 +73,15 @@ function ChartControlsPeek(props: any) {
     };
 
     return (
-        <div style={{
-            position: 'fixed',
-            bottom: '20px',
-            left: '20px',
-            zIndex: 9999
-        }}>
+        // div stuck to top right corner of parent container
+        <div
+            style={{
+                position: 'absolute',
+                top: '20px',
+                right: '34px',
+                zIndex: 1000,
+            }}
+        >
 
             <Modal
                 title="Form Data Values"
@@ -104,7 +107,17 @@ function ChartControlsPeek(props: any) {
                 />
             </Modal>
 
-            <button onClick={handleOpen}>Peek Form Data</button>
+            {/* // button with icon /static/assets/images/assistant_logo_b_w.svg */}
+
+            <Tooltip title="What does this mean?">
+            <img 
+                src="/static/assets/images/assistant_logo_b_w.svg" 
+                alt="Assistant" 
+                style={{ width: '20px', height: '20px', marginRight: '5px' }} 
+                onClick={handleOpen}
+                />
+            </Tooltip>
+
         </div>
     )
 }

@@ -3,7 +3,6 @@ import { AssistantSuggestionProps } from "./AssistantHome/AssistantSuggestion";
 import { DatasourceProps } from "./ContextBuilder/Datasource";
 import { DatasourceTableProps } from "./ContextBuilder/DatasourceTable";
 import { DatasourceSchemaProps } from "./ContextBuilder/DatasourceSchema";
-import { table } from "src/SqlLab/fixtures";
 
 interface Descriptions {
   human_understandable: string,

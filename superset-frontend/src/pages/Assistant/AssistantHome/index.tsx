@@ -91,8 +91,6 @@ export class AssistantHome extends Component<AssistantProps, AssistantState> {
         });
       }
     }, 1000);
-
-
   }
 
   componentDidMount() {
