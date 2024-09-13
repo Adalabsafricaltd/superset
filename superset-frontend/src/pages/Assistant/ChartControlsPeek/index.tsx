@@ -128,6 +128,7 @@ function ChartControlsPeek(props: any) {
                 position: 'absolute',
                 bottom: '5px',
                 right: '5px',
+                zIndex: 1000,
             }}
         >
 
@@ -148,13 +149,18 @@ function ChartControlsPeek(props: any) {
                         display: 'flex',
                         flexDirection: 'row',
                     }}>
-                    <div>
+                    <div
+                    style={{
+                        height: 'wrap-content',
+                        maxWidth: '60%',
+                    }}
+                    >
 
                         {!chartImage && (
                             <Loading />
                         )}
                         {chartImage && (
-                            <img src={chartImage} alt="Chart" />
+                            <img src={chartImage} alt="Chart" width={'100%'}/>
                         )}
                     </div>
                     <div
@@ -162,6 +168,7 @@ function ChartControlsPeek(props: any) {
                         display: 'flex',
                         flexDirection: 'column',
                         height: 'wrap-content',
+                        maxWidth: '40%',
                     }}
                     >
                         <div>
