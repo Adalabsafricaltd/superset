@@ -70,7 +70,7 @@ export class DatasourceSchema extends Component<DatasourceSchemaProps, Datasourc
 
     // Refetch tables data and restore selection for by table name
     handleRefresh = async () => {
-        this.setState({ 
+        this.setState({
             loading: true,
             confirmRefreshModalVisible: false
         });
@@ -80,7 +80,7 @@ export class DatasourceSchema extends Component<DatasourceSchemaProps, Datasourc
     };
 
     async componentDidMount() {
-        const {tables } = this.props;
+        const { tables } = this.props;
         console.log("DatasourceSchema Props componentDidMount ", this.props);
         if (tables?.length === 0) {
             this.handleRefresh();
@@ -99,7 +99,7 @@ export class DatasourceSchema extends Component<DatasourceSchemaProps, Datasourc
             confirmRefreshModalVisible: false
         });
     };
-    
+
 
     componentDidUpdate(prevProps: Readonly<DatasourceSchemaProps>, prevState: Readonly<DatasourceSchemaProps>, snapshot?: any): void {
         console.log("DatasourceSchema Props componentDidUpdate", prevState);
@@ -243,10 +243,10 @@ export class DatasourceSchema extends Component<DatasourceSchemaProps, Datasourc
                         </Collapse.Panel>
                     </Collapse>
                     <Modal
-                    style={{
-                        // max height of modal is 100% of the viewport
-                        maxHeight: '100vh',
-                    }}
+                        style={{
+                            // max height of modal is 100% of the viewport
+                            maxHeight: '100vh',
+                        }}
                         title="Clear Selection and Refresh"
                         visible={this.state.confirmRefreshModalVisible}
                         onOk={this.handleRefresh}
@@ -254,7 +254,7 @@ export class DatasourceSchema extends Component<DatasourceSchemaProps, Datasourc
                         zIndex={2000}
                         centered >
                         <p>Are you sure you want to clear the selection and refresh the tables?</p>
-                        </Modal>
+                    </Modal>
                 </div>
             </>
         );

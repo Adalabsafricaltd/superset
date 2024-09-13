@@ -1,26 +1,75 @@
-import { Button, Modal, Tooltip } from "antd";
-import { getChartControlValues, saveChartExample } from "../assistantUtils";
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { Button, Image, Modal, Tooltip } from "antd";
+import { getChartControlValues, saveChartExample, getChartExplanation } from "../assistantUtils";
+import { useEffect, useState } from "react";
 import { QueryFormData } from "@superset-ui/core";
+import { getControlsState } from "../../../explore/store"
+import { getDomAsImageByteArray } from "../contextUtils";
+import Loading from "src/components/Loading";
+
+
+/** TODO Get Chart screen shot */
 
 
 function ChartControlsPeek(props: any) {
-    const dispatch = useDispatch();
 
-    console.log('ChartControlsPeek => props:', props)
+
+    const internalProps = {
+        controls: props.controls || getControlsState(props, props.formData || props.form_data),
+        form_data: props.formData || props.form_data || null,
+        datasource: props.datasource || null,
+        chart_selector: props.chart_selector || null,
+    }
+
+    console.log('ChartControlsPeek => props:', internalProps)
 
     // ia open state
     const [isOpen, setIsOpen] = useState(false);
-    const [formDataLcl, setFormDataLcl] = useState(props.form_data);
+    const [formDataLcl, setFormDataLcl] = useState(internalProps.form_data);
+    const [chartImage, setChartImage] = useState(null);
+    const [description, setDescription] = useState<{
+        analysis?: string;
+        insights?: string;
+        recommendations?: string;
+        take_away?: string;
+    }>({});
+
+    useEffect(() => {
+        if (internalProps.chart_selector && isOpen) {
+            getDomAsImageByteArray(internalProps.chart_selector).then(imageData => {
+                setChartImage(imageData);
+            });
+        }
+    }, [internalProps.chart_selector, isOpen]);
+
+    useEffect(() => {
+
+        if (!chartImage) {
+            return;
+        }
+
+        // get chart explanation
+        getChartExplanation(internalProps.datasource, internalProps.controls, internalProps.form_data, chartImage)
+            .then(explanation => {
+                setDescription({
+                    ...explanation,
+                });
+            })
+
+    }, [chartImage]);
 
     const handleSaveExample = () => {
         console.log('ChartControlsPeek => handleSaveExample => To be removed')
-        const { controls, form_data, datasource } = props;
+        const { controls, form_data, datasource } = internalProps;
         const cleaned_controls = {
             ...controls
         }
         delete cleaned_controls.datasource.user
+
+        let imageData = null;
+
+        if (internalProps.chart_selector) {
+            imageData = getDomAsImageByteArray(internalProps.chart_selector);
+        }
         // saveChartExample(formDataLcl.viz_type, cleaned_controls, formDataLcl);
     };
 
@@ -77,25 +126,65 @@ function ChartControlsPeek(props: any) {
         <div
             style={{
                 position: 'absolute',
-                top: '20px',
-                right: '34px',
-                zIndex: 1000,
+                bottom: '20px',
+                right: '20px',
             }}
         >
 
             <Modal
-                title="Form Data Values"
+                title="Assistant Analysis"
                 visible={isOpen}
                 onCancel={handleClose}
                 width="80%"
                 footer={[
                     <Button key="back" onClick={handleClose}> Close </Button>,
-                    <Button key="save" onClick={handleUpdateData}> Update Form Data </Button>,
-                    <Button key="apply-assist" onClick={handleApplyAssistant}> Apply Assistant </Button>,
-                    <Button key="save-example" onClick={handleSaveExample}> Save Example </Button>
+                    // <Button key="save" onClick={handleUpdateData}> Update Form Data </Button>,
+                    // <Button key="apply-assist" onClick={handleApplyAssistant}> Apply Assistant </Button>,
+                    // <Button key="save-example" onClick={handleSaveExample}> Save Example </Button>
                 ]}
             >
-                <textarea
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                    }}>
+                    <div>
+
+                        {!chartImage && (
+                            <Loading />
+                        )}
+                        {chartImage && (
+                            <img src={chartImage} alt="Chart" />
+                        )}
+                    </div>
+                    <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        height: 'wrap-content',
+                    }}
+                    >
+                        <div>
+                            <h4>Analysis</h4>
+                            <p>{description.analysis}</p>
+                        </div>
+                        <div>
+                            <h4>Insights</h4>
+                            <p>{description.insights}</p>
+                        </div>
+                        <div>
+                            <h4>Recommendations</h4>
+                            <p>{description.recommendations}</p>
+                        </div>
+                        <div>
+                            <h4>Takeaway</h4>
+                            <p>{description.take_away}</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* <textarea
                     value={JSON.stringify(formDataLcl, null, 2)}
                     onChange={handleTextareaChange} // Add the textarea change handler
                     style={{
@@ -104,22 +193,22 @@ function ChartControlsPeek(props: any) {
                         minHeight: '400px',
                         marginTop: '10px'
                     }}
-                />
+                /> */}
             </Modal>
 
             {/* // button with icon /static/assets/images/assistant_logo_b_w.svg */}
-
-            <Tooltip title="What does this mean?">
-            <img 
-                src="/static/assets/images/assistant_logo_b_w.svg" 
-                alt="Assistant" 
-                style={{ width: '20px', height: '20px', marginRight: '5px' }} 
-                onClick={handleOpen}
-                />
-            </Tooltip>
+            {!isOpen && (
+                <Tooltip title="What does this mean?">
+                    <img
+                        src="/static/assets/images/assistant_logo_b_w.svg"
+                        alt="Assistant"
+                        style={{ width: '20px', height: '20px', marginRight: '5px' }}
+                        onClick={handleOpen}
+                    />
+                </Tooltip>
+            )}
 
         </div>
     )
 }
-
 export default ChartControlsPeek;

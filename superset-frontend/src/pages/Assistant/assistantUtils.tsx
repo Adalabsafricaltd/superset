@@ -98,7 +98,7 @@ export const getVizSuggestions = async (data: DatasourceProps[], purpose: string
 };
 
 export function saveChartExample(viz_type: string, controls: any, formData: any) {
-  const endpoint = 'assistant/gemini/save-control-values';
+  const endpoint = 'assistant/gemini/save-control-values/';
   const data = {
     viz_type: viz_type,
     controls: controls,
@@ -120,6 +120,22 @@ export function getChartControlValues(prompt: string, viz_type: string, datasour
   return SupersetClient.post({ endpoint: endpoint, body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
     .then((response) => {
       console.log("assistantUtils getChartControlValues Response:", response);
+      return JSON.parse(response.json)
+    });
+}
+
+export function getChartExplanation( datasource: any, controls: any, form_data: any, image: any ){
+  const endpoint = 'assistant/gemini/get-viz-explanation';
+  const data = {
+    datasource: datasource,
+    controls: controls,
+    form_data: form_data,
+    image: image
+  };
+  console.log("assistantUtils getChartExplanation data", JSON.stringify(data));
+  return SupersetClient.post({ endpoint: endpoint, body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
+    .then((response) => {
+      console.log("assistantUtils getChartExplanation Response:", response);
       return JSON.parse(response.json)
     });
 }

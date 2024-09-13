@@ -130,17 +130,20 @@ function AssistantChartWrapper(WrappedComponent) {
 
   return function AssistantChart(props) {
 
-
+    const unique_selector = "dashboard-chart-id-" + props.id;
     // console.log('AssistantChartWrapper', props);
     return <>
       <div
+        className={unique_selector}
         style={{
 
         }}
       >
         <ChartControlsPeek {...{
+          ...props,
           form_data: props.formData,
           datasource: props.datasource,
+          chart_selector: "."+unique_selector
         }} />
         <WrappedComponent {...props} />
       </div>

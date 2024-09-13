@@ -1,5 +1,6 @@
 import { QueryResults, SupersetClient } from "@superset-ui/core";
 import { nanoid } from "nanoid";
+import domToImage from 'dom-to-image-more';
 
 
 export interface DatabaseContext {
@@ -287,4 +288,37 @@ export function adjustOpacity(hex: string, opacity: number) {
     const opacityHexStr = opacityHex.length === 1 ? `0${opacityHex}` : opacityHex;
     return '#' + hex.slice(1) + opacityHexStr;
 
+}
+
+export async function getDomAsImageByteArray(selector: string) {
+    const element = document.querySelector(selector);
+    if (!element) {
+        console.error(`getDomAsImageByteArray Element with selector "${selector}" not found.`);
+        return;
+    }
+
+    // Mapbox controls are loaded from different origin, causing CORS error
+    // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL#exceptions
+    const filter = (node: Element) => {
+        if (typeof node.className === 'string') {
+          return (
+            node.className !== 'mapboxgl-control-container' &&
+            !node.className.includes('header-controls')
+          );
+        }
+        return true;
+    };
+
+    let retVal = null;
+    try {
+        const data = await domToImage.toJpeg(element, {
+            filter: filter,
+            bgcolor: '#ffffff',
+        });
+        retVal = data;
+    } catch (error: any) {
+       
+    }
+    console.error('getDomAsImageByteArray data: ', selector, retVal);
+    return retVal;
 }

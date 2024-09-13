@@ -117,7 +117,6 @@ const getDashboardContextFormData = () => {
 
 export default function ExplorePage() {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [assistantEnabled, setAssistantEnabled] = useState(false);
   const isExploreInitialized = useRef(false);
   const dispatch = useDispatch();
   const location = useLocation();
