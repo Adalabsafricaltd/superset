@@ -126,8 +126,8 @@ function ChartControlsPeek(props: any) {
         <div
             style={{
                 position: 'absolute',
-                bottom: '20px',
-                right: '20px',
+                bottom: '5px',
+                right: '5px',
             }}
         >
 
