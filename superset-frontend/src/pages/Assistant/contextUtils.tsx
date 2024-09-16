@@ -316,9 +316,9 @@ export async function getDomAsImageByteArray(selector: string) {
             bgcolor: '#ffffff',
         });
         retVal = data;
+        console.log('getDomAsImageByteArray converted DOm to image:', data);
     } catch (error: any) {
-       
+     console.error('getDomAsImageByteArray Error converting DOM to image:', error);
     }
-    console.error('getDomAsImageByteArray data: ', selector, retVal);
     return retVal;
 }

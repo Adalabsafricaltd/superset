@@ -9,7 +9,10 @@ from superset.models.core import Database
 from flask import current_app
 from flask import request
 import google.generativeai as genai
+import uuid
 import logging
+import os
+import base64
 from superset.views.assistant.support import AssistantSupport
 
 
@@ -47,36 +50,6 @@ class AssistantView(BaseSupersetView):
                 "Do not use Distict on columns that will be grouped by."
             ]
         },
-        # "world_map": {
-        #     "name": "World Map",
-        #     "credits": [
-        #         "http://datamaps.github.io/"
-        #     ],
-        #     "description": "A map of the world, that can indicate values in different countries. Can only be used with data that contains country names or codes.",
-        #     "supportedAnnotationTypes": [],
-        #     "behaviors": [
-        #         "INTERACTIVE_CHART",
-        #         "DRILL_TO_DETAIL",
-        #         "DRILL_BY"
-        #     ],
-        #     "datasourceCount": 1,
-        #     "enableNoResults": True,
-        #     "tags": [
-        #         "2D",
-        #         "Comparison",
-        #         "Intensity",
-        #         "Legacy",
-        #         "Multi-Dimensions",
-        #         "Multi-Layers",
-        #         "Multi-Variables",
-        #         "Scatter",
-        #         "Featured"
-        #     ],
-        #     "category": "Map",
-        #     "additionalConsiderations": [
-        #         "Data must contain country names or codes."
-        #     ]
-        # },
         "echarts_timeseries_line": {
             "name": "Line Chart",
             "canBeAnnotationTypes": [],
@@ -229,6 +202,8 @@ class AssistantView(BaseSupersetView):
                 - Do not suggest a viz_type that is not available in the Available visualizations.
                 - Only suggest a maximum of 5 visualizations.
                 - Only use data from above to generate the response.
+
+                
                 
                 Format:
                 [
@@ -360,3 +335,90 @@ class AssistantView(BaseSupersetView):
         self.logger.info(f"Response: {response.text}")
         return self.json_response(response.text)
     
+    def upload_to_genai(self, fileData):
+        self.logger.info(f"Uploading to GenAI: {fileData}")
+
+        # save fileData to local storage then delete once uploaded to genai
+        # fileData is always a base64 encoded image with prefix "data:image/jpeg;base64,"
+        temp_path = f"temp_{uuid.uuid4()}.jpeg"
+
+        dataPortion = fileData.split(",")[1] # remove "data:image/jpeg;base64," prefix
+        
+        with open(temp_path, "wb") as f:
+            f.write(base64.b64decode(dataPortion))
+
+        file = genai.upload_file(temp_path)
+        self.logger.info(f"Uploaded to GenAI: {file.display_name} => {file.uri}")
+        # delete temp file
+        os.remove(temp_path)
+        return file
+
+    @expose("/gemini/get-viz-explanation", methods=["POST"])
+    def get_viz_explanation(self) -> FlaskResponse:
+        """ Request schema
+        {
+            datasource: {}, this is the datasource used to create the viz
+            form_data: {}, this are the values used to create the viz from the controls
+            controls: {}, this are the controls used to create the viz. controls values form the form_data which in turn is used to create the viz.
+            image: [], base64 encoded image with prefix "data:image/jpeg;base64,"
+            image_type: jpeg
+        }
+        """
+        body = request.json
+        self.logger.info(f"get_viz_explanation Request: {body}")
+        image = body["image"]
+        file = self.upload_to_genai(image)
+        datasource = body["datasource"]
+        form_data = body["form_data"]
+        controls = body["controls"]
+
+        chat_session = self.model.start_chat(
+            history=[
+                {
+                    "role": "user",
+                    "parts": [
+                        file,
+                        f"""The following chart was created from the datasource {datasource}
+                        The chart controls {controls} are used to controls what is displayed in the chart.
+                        The values obtained fromthe controls form the form_data {form_data}.
+                        Using all the above information, explain what the chart is trying to convey.
+                        The response should be a json object with the following structure:
+                        Do not make assumptions about the data.
+                        Do not make assumptions about the chart.
+                        Do not make assumptions about the chart controls.
+                        Do not make assumptions about the form_data.
+                        Do not make assumptions about the datasource.
+                        Take into account that the chart controls and form_data are used to control what is displayed in the chart.
+                        Take into account any displayed text in the chart.
+                        Use valid json value types. ie boolean values should be true or false. not True or False. i.e lowercase.
+                        {{
+                            "viz_type": "viz_type",
+                            "viz_title": "viz_title",
+                            "analysis": "An analysis of the chart, using the chart controls and form_data to explain what the chart is trying to convey. use simple language and avoid technical jargon.",
+                            "take_away": "A summary of the chart, using the chart controls and form_data to explain what the chart is trying to convey. use simple language and avoid technical jargon.",
+                            "recommendations": "A recommendation based on the chart, using the chart controls and form_data to explain what can be done to improve the chart. use simple language and avoid technical jargon.",
+                            "insights": "A summary of the chart, using the chart controls and form_data to explain what the chart is trying to convey. use simple language and avoid technical jargon.",
+                            "form_data_used": [
+                                From the controls and chart determine the values in form_data that were used to create the chart. and other possible values that could have been used to create the chart.
+                                the output is an array of object with the following structure:
+                                {{
+                                 control_name: "control_name",
+                                 control_value: "control_value",
+                                 other_possible_values: ["other_possible_values"],
+                                 description: "description of the control_value",
+                                 recommended_values: ["recommended control_values to  use in order to implement the recommendations"],
+
+                                }}
+                                ],
+                        }}
+
+                        """,
+                    ]
+                }
+            ]
+        )
+
+        response = chat_session.send_message(f"What information does the chart convey?")
+
+        return self.json_response(response.text)
+        

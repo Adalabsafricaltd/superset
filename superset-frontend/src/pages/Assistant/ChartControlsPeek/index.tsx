@@ -1,4 +1,4 @@
-import { Button, Image, Modal, Tooltip } from "antd";
+import { Button, Image, Modal, Spin, Tooltip } from "antd";
 import { getChartControlValues, saveChartExample, getChartExplanation } from "../assistantUtils";
 import { useEffect, useState } from "react";
 import { QueryFormData } from "@superset-ui/core";
@@ -32,6 +32,7 @@ function ChartControlsPeek(props: any) {
         recommendations?: string;
         take_away?: string;
     }>({});
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (internalProps.chart_selector && isOpen) {
@@ -46,14 +47,17 @@ function ChartControlsPeek(props: any) {
         if (!chartImage) {
             return;
         }
-
+        setIsLoading(true);
         // get chart explanation
         getChartExplanation(internalProps.datasource, internalProps.controls, internalProps.form_data, chartImage)
             .then(explanation => {
                 setDescription({
                     ...explanation,
                 });
-            })
+
+            }).finally(() => {
+                setIsLoading(false);
+            });
 
     }, [chartImage]);
 
@@ -150,43 +154,58 @@ function ChartControlsPeek(props: any) {
                         flexDirection: 'row',
                     }}>
                     <div
-                    style={{
-                        height: 'wrap-content',
-                        maxWidth: '60%',
-                    }}
+                        style={{
+                            height: 'wrap-content',
+                            maxWidth: '60%',
+                        }}
                     >
 
                         {!chartImage && (
                             <Loading />
                         )}
                         {chartImage && (
-                            <img src={chartImage} alt="Chart" width={'100%'}/>
+                            <>
+                                <img src={chartImage} alt="Chart" width={'100%'} />
+                                {!isLoading && (
+                                    <>
+                                        <div>
+                                            <h4>Analysis</h4>
+                                            <p>{description.analysis}</p>
+                                        </div>
+                                    </>
+                                )}
+                            </>
                         )}
                     </div>
                     <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        height: 'wrap-content',
-                        maxWidth: '40%',
-                    }}
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            height: 'wrap-content',
+                            maxWidth: '40%',
+                        }}
                     >
-                        <div>
-                            <h4>Analysis</h4>
-                            <p>{description.analysis}</p>
-                        </div>
-                        <div>
-                            <h4>Insights</h4>
-                            <p>{description.insights}</p>
-                        </div>
-                        <div>
-                            <h4>Recommendations</h4>
-                            <p>{description.recommendations}</p>
-                        </div>
-                        <div>
-                            <h4>Takeaway</h4>
-                            <p>{description.take_away}</p>
-                        </div>
+                        {isLoading && (
+                            <Spin />
+                        )}
+                        {!isLoading && (
+                            <>
+
+                                <div>
+                                    <h4>Insights</h4>
+                                    <p>{description.insights}</p>
+                                </div>
+                                <div>
+                                    <h4>Recommendations</h4>
+                                    <p>{description.recommendations}</p>
+                                </div>
+                                <div>
+                                    <h4>Takeaway</h4>
+                                    <p>{description.take_away}</p>
+                                </div>
+                            </>
+                        )}
+
                     </div>
 
                 </div>
