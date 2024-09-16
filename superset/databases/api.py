@@ -344,6 +344,10 @@ class DatabaseRestApi(BaseSupersetModelRestApi):
               $ref: '#/components/responses/500'
         """
         database = DatabaseDAO.find_by_id(pk)
+        
+        # Log database
+        logger.info(f"Database {pk} info: {database}")
+
         database_connection_schema = DatabaseConnectionSchema()
         response = {
             "id": pk,

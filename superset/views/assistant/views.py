@@ -14,7 +14,10 @@ import logging
 import os
 import base64
 from superset.views.assistant.support import AssistantSupport
-
+from superset.daos.database import DatabaseDAO
+from superset.commands.database.exceptions import DatabaseNotFoundError
+from typing import cast
+from superset.models.core import Database
 
 class AssistantView(BaseSupersetView):
 
@@ -112,6 +115,20 @@ class AssistantView(BaseSupersetView):
     def root(self) -> FlaskResponse:
         """ Assistant Home Page """
         return self.render_app_template()
+
+    # endpoint /gemini/db/{dbPk} 
+    @expose("/gemini/db/<int:dbPk>", methods=["GET"])
+    def dbTest(self, dbPk) -> FlaskResponse:
+        """ Test DB Connection """
+        self.logger.info(f"Database => {dbPk}")
+        database = cast(Database, DatabaseDAO.find_by_id(dbPk))
+        if not database:
+            raise DatabaseNotFoundError()
+        # Get DB Connection
+        self.logger.info(f"Database => {dbPk} info: {database.sqlalchemy_uri_decrypted}")
+
+
+        return self.json_response(f"DB ID {dbPk}")
     
      # Api to interact with gemini and get table descriptions
     @expose("/gemini/table", methods=["POST"])
