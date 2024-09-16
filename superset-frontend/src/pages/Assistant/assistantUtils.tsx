@@ -139,3 +139,17 @@ export function getChartExplanation( datasource: any, controls: any, form_data: 
       return JSON.parse(response.json)
     });
 }
+
+export function dbConnection(dbPk: number){
+  console.log("assistantUtils dbConnection dbPk", dbPk);
+  const endpoint = `assistant/gemini/db/${dbPk}`
+  return SupersetClient.get({ endpoint: endpoint, headers: { 'Content-Type': 'application/json' } })
+  .then((response) => {
+    console.log("assistantUtils dbConnection Response:", response);
+    
+  })
+  .catch((error) => {
+    console.error("assistantUtils dbConnection Error:", error);
+    throw error;
+  })
+}
