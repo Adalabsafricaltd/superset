@@ -3,7 +3,7 @@ import { DatasourceSchemaProps, DatasourceSchema } from "./DatasourceSchema";
 import React from "react";
 import { fetchSchemaData, DatabaseScemaData } from "../contextUtils";
 import { AssistantActionsType } from '../actions';
-import { dbConnection } from "../assistantUtils";
+
 
 /**
  * Props
@@ -42,7 +42,6 @@ export class Datasource extends React.Component<DatasourceProps> {
     async componentDidMount() {
         console.log("Datasource Props componentDidMount", this.props);
         const { id , datasourceName, schema} = this.props;
-        await dbConnection(id);
         if (schema.length === 0) {
             const schema = await fetchSchemaData(id);
             const schemaData:DatasourceSchemaProps[]  = schema.map((schema: DatabaseScemaData) => {

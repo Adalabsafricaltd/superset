@@ -4,6 +4,7 @@ import { DatasourceTable } from "./DatasourceTable";
 import React, { Component } from "react";
 import { fetchTableData, DatabaseSchemaTableData } from "../contextUtils";
 import { AssistantActionsType } from '../actions';
+import { dbConnection } from "../assistantUtils";
 
 /**
  * Props
@@ -139,10 +140,11 @@ export class DatasourceSchema extends Component<DatasourceSchemaProps, Datasourc
         });
     };
 
-    handleGenerateDescription = () => {
+    handleGenerateDescription = async () => {
         this.setState({
             isDescriptionLoading: true
         });
+        await dbConnection(this.props.databaseId)
         setTimeout(() => {
             this.setState((prevState) => {
                 return {

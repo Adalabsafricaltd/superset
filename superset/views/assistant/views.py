@@ -14,6 +14,7 @@ import logging
 import os
 import base64
 from superset.views.assistant.support import AssistantSupport
+from superset.views.assistant.sql_langchain_azure_open_ai import SQLLangchainAzureOpenAI
 from superset.daos.database import DatabaseDAO
 from superset.commands.database.exceptions import DatabaseNotFoundError
 from typing import cast
@@ -126,9 +127,12 @@ class AssistantView(BaseSupersetView):
             raise DatabaseNotFoundError()
         # Get DB Connection
         self.logger.info(f"Database => {dbPk} info: {database.sqlalchemy_uri_decrypted}")
-
+        azureLang = SQLLangchainAzureOpenAI(dbPk)
+        azureLang.initialize()
 
         return self.json_response(f"DB ID {dbPk}")
+    
+    
     
      # Api to interact with gemini and get table descriptions
     @expose("/gemini/table", methods=["POST"])

@@ -12,6 +12,16 @@
     #   -r requirements/development.in
 sqlalchemy-drill==1.1.5
 
+langchain-core==0.2.39
+
+langchain-openai==0.1.23
+
+langchain==0.2.16
+
+langchain-community==0.2.16
+
+langchain-google-genai==1.0.10
+
 google-generativeai==0.7.2
 
 appnope==0.1.4
