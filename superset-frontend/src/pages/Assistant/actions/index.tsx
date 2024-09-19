@@ -4,6 +4,8 @@ import * as ActionTypes from './types';
 import { DatasourceProps } from '../ContextBuilder/Datasource';
 import { DatasourceSchemaProps } from '../ContextBuilder/DatasourceSchema';
 import { DatasourceTableProps, DatasourceTableColumnProps } from '../ContextBuilder/DatasourceTable';
+import { PromptResponseProps, UserPromptProps } from '../ChatMessages/ChatMessage';
+import { id } from 'spec/fixtures/mockDatasource';
 
 export interface AssistantActions {
     type: string;
@@ -166,6 +168,45 @@ const updateDatabaseSchemaTable = (data: DatasourceTableProps) => {
     return action;
 };
 
+export interface NewPromptAction extends AssistantActions {
+  payload: {
+    promptId: string;
+    data: UserPromptProps;
+  }
+}
+
+const newPrompt = (promptId: string,data: UserPromptProps) => {
+  console.log("NEW_PROMPT Creating new prompt", data);
+  const action: NewPromptAction = {
+    type: ActionTypes.NEW_PROMPT,
+    payload: {
+        promptId: promptId,
+        data: data,
+    }
+  };
+  return action;
+};
+
+export interface PromptResponseAction extends AssistantActions {
+  payload: {
+    promptId: string;
+    response: PromptResponseProps;
+  }
+}
+
+const updatePromptResponse = (promptId: string, data: PromptResponseProps) => {
+  console.log("UPDATE_PROMPT_RESPONSE Updating prompt response", data);
+  const action: PromptResponseAction = {
+    type: ActionTypes.UPDATE_PROMPT_RESPONSE,
+    payload: {
+      promptId: promptId,
+      response: data
+    }
+  };
+  return action;
+};
+
+
 export const actions = {
     selectAssistantSuggestion,
     loadDataSourceProps,
@@ -174,7 +215,9 @@ export const actions = {
     clearDatabaseSchemaTableProps,
     loadDatabaseSchemaTableColumns,
     updateDatabaseSchemaTable,
-    clearDatabaseSchemaTableColumns
+    clearDatabaseSchemaTableColumns,
+    newPrompt,
+    updatePromptResponse
 };
 
 export type AssistantActionsType = typeof actions;

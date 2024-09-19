@@ -146,7 +146,7 @@ export class DatasourceSelector extends Component<DatasourceSelectorProps, Datas
                     <div
                         style={{
                             flex: '1 1 auto',
-                            width:'fill-available',
+                            width: 'fill-available',
                             height: 'fill-available',
                             overflowY: 'auto',
                         }}
@@ -160,12 +160,12 @@ export class DatasourceSelector extends Component<DatasourceSelectorProps, Datas
                         ))}
                     </div>
                     <div
-                    style={{
-                        flex: '0 1 auto',
-                        alignSelf: 'flex-end',
-                    }}
+                        style={{
+                            flex: '0 1 auto',
+                            alignSelf: 'flex-end',
+                        }}
                     >
-                    <ContextSelection {...summary} />
+                        <ContextSelection {...summary} />
                     </div>
                 </div>
             </>

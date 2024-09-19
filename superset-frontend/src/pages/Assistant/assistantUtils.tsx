@@ -40,24 +40,24 @@ export function cleanDatasourceProps(data: DatasourceProps[]) {
   return data.map(datasource => filterSelectedSchemas(datasource)).filter(datasource => datasource.schema.length > 0);
 }
 
-function filterSelectedSchemas( data: DatasourceProps ): DatasourceProps {
+function filterSelectedSchemas(data: DatasourceProps): DatasourceProps {
   return {
     ...data,
-    schema: data.schema.map( schema => filterSelectedTables(schema) ).filter(schema => schema.tables.length > 0)
+    schema: data.schema.map(schema => filterSelectedTables(schema)).filter(schema => schema.tables.length > 0)
   }
 }
 
 // Returns DatasourceSchemaProps with only selected tables
 // Selected tables have selected columns
-function filterSelectedTables(data: DatasourceSchemaProps ): DatasourceSchemaProps{
+function filterSelectedTables(data: DatasourceSchemaProps): DatasourceSchemaProps {
   return {
     ...data,
-    tables: data.tables.map( table => filterSelectedColumns(table) ).filter(table => table.columns.length > 0)
+    tables: data.tables.map(table => filterSelectedColumns(table)).filter(table => table.columns.length > 0)
   }
 }
 
 // Returns DatasourceTableProps with only selected columns
-function filterSelectedColumns( data: DatasourceTableProps ): DatasourceTableProps {
+function filterSelectedColumns(data: DatasourceTableProps): DatasourceTableProps {
   return {
     ...data,
     columns: data.columns.filter((column) => column.selected),
@@ -124,7 +124,7 @@ export function getChartControlValues(prompt: string, viz_type: string, datasour
     });
 }
 
-export function getChartExplanation( datasource: any, controls: any, form_data: any, image: any ){
+export function getChartExplanation(datasource: any, controls: any, form_data: any, image: any) {
   const endpoint = 'assistant/gemini/get-viz-explanation';
   const data = {
     datasource: datasource,
@@ -140,16 +140,71 @@ export function getChartExplanation( datasource: any, controls: any, form_data: 
     });
 }
 
-export function dbConnection(dbPk: number){
+export function dbConnection(dbPk: number) {
   console.log("assistantUtils dbConnection dbPk", dbPk);
   const endpoint = `assistant/gemini/db/${dbPk}`
   return SupersetClient.get({ endpoint: endpoint, headers: { 'Content-Type': 'application/json' } })
-  .then((response) => {
-    console.log("assistantUtils dbConnection Response:", response);
-    
-  })
-  .catch((error) => {
-    console.error("assistantUtils dbConnection Error:", error);
-    throw error;
-  })
+    .then((response) => {
+      console.log("assistantUtils dbConnection Response:", response);
+
+    })
+    .catch((error) => {
+      console.error("assistantUtils dbConnection Error:", error);
+      throw error;
+    })
+}
+
+export type PromptPayload = {
+  databaseId: string;
+  context: {
+    schemaName: string;
+    description?: string;
+    tables: {
+      tableName: string;
+      description?: string;
+      descriptionExtra?: string;
+      columns: {
+        columnName: string;
+        columnType: string;
+        columnDescription?: string
+      }[];
+    }[];
+  }[]
+  prompt: string;
+};
+
+export function prompt(context: DatasourceProps, prompt: string) {
+  console.log("assistantUtils prompt context", context);
+  console.log("assistantUtils prompt prompt", prompt);
+
+  const endpoint = 'assistant/gemini/prompt';
+
+  const data: PromptPayload = {
+    databaseId: context.id,
+    context: context.schema.map(schema => ({
+      schemaName: schema.schemaName,
+      description: schema.description,
+      tables: schema.tables.map(table => ({
+        tableName: table.tableName,
+        description: table.description,
+        descriptionExtra: table.descriptionExtra,
+        columns: table.columns.filter(column => column.selected).map(column => ({
+          columnName: column.columnName,
+          columnType: column.columnType,
+          columnDescription: column.columnDescription
+        }))
+      }))
+    })),
+    prompt: prompt
+  };
+
+  return SupersetClient.post({ endpoint: endpoint, body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
+    .then((response) => {
+      console.log("assistantUtils prompt Response:", response);
+
+    })
+    .catch((error) => {
+      console.error("assistantUtils prompt Error:", error);
+      throw error;
+    });
 }

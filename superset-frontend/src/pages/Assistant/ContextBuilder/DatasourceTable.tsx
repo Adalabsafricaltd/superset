@@ -148,8 +148,6 @@ export class DatasourceTable extends Component<DatasourceTableProps, DatasourceT
     }
 
     componentDidUpdate(prevProps: Readonly<DatasourceTableProps>, prevState: Readonly<DatasourceTableProps>, snapshot?: any): void {
-        console.log("DatasourceTable Props componentDidUpdate prevProps", prevProps);
-        console.log("DatasourceTable Props componentDidUpdate", this.props);
         // update the state if the props have changed
         if (prevProps.columns !== this.props.columns) {
             this.setState({ columns: this.props.columns });
@@ -238,7 +236,7 @@ export class DatasourceTable extends Component<DatasourceTableProps, DatasourceT
 
     render() {
         const { selected, columns, selectedColumns, loading, description, descriptionFocused, isDescriptionLoading, data, query, isOpen, confirmRefreshModalVisible } = this.state;
-        const tableColumns: ColumnType<DatasourceTableColumnProps> = [
+        const tableColumns: ColumnType<DatasourceTableColumnProps>[] = [
             { title: 'Column', dataIndex: 'columnName', key: 'columnName' },
             { title: 'Type', dataIndex: 'columnType', key: 'columnType' },
             // Description input

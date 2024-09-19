@@ -80,9 +80,9 @@ function Assistant(props: AssistantProps) {
             datasources={props.data || []}
             actions={props.actions}
             onChange={(data) => {
-              
+
             }} />
-          
+
         </div>
 
       </Modal>
@@ -94,34 +94,44 @@ function Assistant(props: AssistantProps) {
 
   return (
     <>
-      <SubMenu
-        name="Assistant"
-        buttons={[
-          {
-            name: (
-              <>
-                <BuildFilled height={'24px'} width={'24px'} /> {t('Context Builder')}
-              </>
-            ),
-            onClick: () => {handleContextBuilderOpen() },
-            buttonStyle: 'secondary'
-          },
-          {
-            name: (
-              <>
-              <SettingFilled height={'24px'} width={'24px'} /> {t('Settings')}
-              </>
-            ),
-            onClick: () => { setSettingsOpen(true) },
-            buttonStyle: 'primary'
-          }
-        ]}
-      />
-      <AssistantHome {...{
-        ...props,
-      }} />
+      <div
+        style={{
+          height: '100%',
+          flex: '1',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <SubMenu
+          name="Assistant"
+          buttons={[
+            {
+              name: (
+                <>
+                  <BuildFilled height={'24px'} width={'24px'} /> {t('Context Builder')}
+                </>
+              ),
+              onClick: () => { handleContextBuilderOpen() },
+              buttonStyle: 'secondary'
+            },
+            {
+              name: (
+                <>
+                  <SettingFilled height={'24px'} width={'24px'} /> {t('Settings')}
+                </>
+              ),
+              onClick: () => { setSettingsOpen(true) },
+              buttonStyle: 'primary'
+            }
+          ]}
+        />
+        <AssistantHome {...{
+          ...props,
+        }} />
+      </div>
+
       {assistantContextBuilderModal()}
-      <Settings isOpen={isSettingsOpen} onClose={()=>{
+      <Settings isOpen={isSettingsOpen} onClose={() => {
         setSettingsOpen(false)
       }} />
     </>

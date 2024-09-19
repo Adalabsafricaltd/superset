@@ -14,7 +14,6 @@ export function AssistantWelcomeMessage(props: AssistantWelcomeMessageProps) {
             justifyContent: 'center',
             alignContent: 'center',
             alignItems: 'center',
-            flex: 'wrap',
             flexDirection: 'column',
             gap: '10px',
             padding: '10px',

@@ -7,12 +7,15 @@ import {
     LoadDatabaseSchemaTableColumnsAction,
     UpdateDatabaseSchemaTableAction,
     ClearDatabaseSchemaTablePropsAction,
-    ClearDatabaseSchemaTableColumnsAction
+    ClearDatabaseSchemaTableColumnsAction,
+    NewPromptAction,
+    PromptResponseAction
 } from '../actions';
 import * as ActionTypes from '../actions/types';
 import { DatasourceProps } from '../ContextBuilder/Datasource';
 import { DatasourceSchemaProps } from '../ContextBuilder/DatasourceSchema';
 import { DatasourceTableProps } from '../ContextBuilder/DatasourceTable';
+import { ChatMessageProps } from '../ChatMessages/ChatMessage';
 
 
 export default function AssistantReducer(
@@ -20,6 +23,7 @@ export default function AssistantReducer(
         enabled: false,
         data: [],
         selected: null,
+        conversation: []
     }, 
     action: AssistantActions
 ){
@@ -142,11 +146,17 @@ export default function AssistantReducer(
         case ActionTypes.UPDATE_DATABASE_SCHEMA_TABLE_PROPS:
             let updatedTable = (action as UpdateDatabaseSchemaTableAction).payload.data;
             console.log("Updated Table", updatedTable);
+            // Deselect all tables and columns for datasource not equal to updatedTable.databaseId
             return {
                 ...state,
                 data: state.data.map((datasource: DatasourceProps) => {
                     datasource.schema = datasource.schema.map((schema: DatasourceSchemaProps) => {
+
                         schema.tables = schema.tables.map((table: DatasourceTableProps) => {
+                            if (datasource.id !== updatedTable.databaseId){
+                                table.selected = false;
+                                table.selectedColumns = [];
+                            }
                             if (
                                 datasource.id === updatedTable.databaseId &&
                                 schema.schemaName === updatedTable.schemaName &&
@@ -161,6 +171,38 @@ export default function AssistantReducer(
                     return datasource;
                 })
             }
+        
+        case ActionTypes.NEW_PROMPT:
+            const { promptId: newPromptId, data } = (action as NewPromptAction).payload
+            console.log("New Prompt", newPromptId, data, state)
+            const newState = {
+                ...state,
+                conversation: [
+                    ...state.conversation || [],
+                    {
+                        id: newPromptId,
+                        prompt: data
+                    }
+                ]
+            }
+            console.log("New prompt added to conversation state", newState);
+            return  newState;
+        
+        case ActionTypes.UPDATE_PROMPT_RESPONSE:
+            const { promptId, response } = (action as PromptResponseAction).payload
+            return {
+                ...state,
+                conversation: state.conversation?.map((prompt: ChatMessageProps) => {
+                    if(prompt.id === promptId){
+                        return {
+                            ...prompt,
+                            response
+                        }
+                    }
+                    return prompt;
+                })
+            }
+
         default:
             return state;
     }
