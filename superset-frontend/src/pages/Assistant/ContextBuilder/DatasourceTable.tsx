@@ -137,7 +137,6 @@ export class DatasourceTable extends Component<DatasourceTableProps, DatasourceT
     }
 
     async componentDidMount() {
-        console.log("DatasourceTable Props componentDidMount", this.props);
         const { columns } = this.props;
         if (columns.length === 0) {
             this.setState({ loading: true });
@@ -194,7 +193,7 @@ export class DatasourceTable extends Component<DatasourceTableProps, DatasourceT
     };
 
     handleDescriptionInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        console.log("Description Input", e.target.value);
+        
         this.setState({
             description: e.target.value
         }, () => { this.props.actions.updateDatabaseSchemaTable(this.state) });
@@ -202,7 +201,7 @@ export class DatasourceTable extends Component<DatasourceTableProps, DatasourceT
 
 
     handleOpen = () => {
-        console.log("Opening Modal");
+        
         this.setState({
             isOpen: true
         })

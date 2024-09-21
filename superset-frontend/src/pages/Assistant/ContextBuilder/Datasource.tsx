@@ -40,7 +40,7 @@ export class Datasource extends React.Component<DatasourceProps> {
     };
 
     async componentDidMount() {
-        console.log("Datasource Props componentDidMount", this.props);
+        
         const { id , datasourceName, schema} = this.props;
         if (schema.length === 0) {
             const schema = await fetchSchemaData(id);
@@ -59,12 +59,11 @@ export class Datasource extends React.Component<DatasourceProps> {
         }
     }
 
-    async componentDidUpdate(prevProps: Readonly<DatasourceProps>, prevState: Readonly<{}>, snapshot?: any): void {
-        console.log("Datasource Props componentDidUpdate", prevState);
+    async componentDidUpdate(prevProps: Readonly<DatasourceProps>, prevState: Readonly<{}>, snapshot?: any) {
+        
         if (prevProps.schema !== this.props.schema) {
             this.setState({ schema: this.props.schema });
         }
-        
     }
 
     handleOnChange = (data: DatasourceSchemaProps) => {

@@ -1,9 +1,10 @@
-import { Button, Input, Spin } from 'antd'
-import React, { Component } from 'react';
+import { Button, Input, Spin, Tag } from 'antd'
+import React from 'react';
 import { AssistantActionsType } from '../actions';
 import { DatasourceProps } from '../ContextBuilder/Datasource';
 import { v4 as uuid } from 'uuid'
-import { prompt } from '../assistantUtils'
+import { assistantPrompt } from '../assistantUtils'
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 const { TextArea } = Input;
 
 
@@ -12,7 +13,7 @@ export interface AssistantProps {
     actions: AssistantActionsType
 }
 
-export interface AssistantPromptState {
+export interface AssistantPromptState extends AssistantProps {
     prompt: string;
     isLoading: boolean;
     attachments: any[]; // ? what type ?
@@ -22,26 +23,38 @@ export class AssistantPrompt extends React.Component<AssistantProps, AssistantPr
 
     constructor(props: AssistantProps) {
         super(props)
+        console.log("AssistantPrompt Props", props)
         this.state = {
+            ...props,
             prompt: '',
             isLoading: false,
             attachments: []
         }
     }
 
+    componentDidMount() {
+        console.log("AssistantPrompt componentDidMount", this.props)
+    }
+
+    componentDidUpdate(prevProps: Readonly<AssistantProps>, prevState: Readonly<AssistantPromptState>, snapshot?: any): void {
+        console.log("AssistantPrompt componentDidUpdate", prevProps, this.props)
+        if (prevProps.context !== this.props.context) {
+            this.setState({
+                context: this.props.context
+            })
+        }
+    }
+
     handlePrompt = async () => {
         this.setState({ isLoading: true })
-        // is New ?
+        
         const promptId = uuid()
-        const inputPrompt = this.state.prompt
-        this.props.actions.newPrompt(promptId, { prompt: inputPrompt })
-        // Get response
-        let { context } = this.props
-        console.log("handlePrompt => ", promptId, inputPrompt, context)
-        if (context) {
-            const response = await prompt(context, this.state.prompt)
-            // TODO send response action
-
+        const {prompt , context} = this.state
+        console.log("handlePrompt => ", promptId, prompt, context)
+        if( prompt.length > 0 && context){
+            this.props.actions.newPrompt(promptId, { prompt })
+            const response = await assistantPrompt(context, prompt)
+            
         }
         this.props.actions.updatePromptResponse(promptId, { message: "some message that may make sense", sql_query: "SELECT SOME DATA FROM DATABASE", can_be_visualized: "true" })
 
@@ -52,10 +65,12 @@ export class AssistantPrompt extends React.Component<AssistantProps, AssistantPr
         this.setState({ prompt: event.target.value })
         console.log(event.target.value)
     }
+
     render() {
 
-        const { isLoading, prompt } = this.state
-        console.log("Prompt state:", this.state)
+        const { isLoading, prompt, context } = this.state
+        console.log("Prompt state:", this.state.context)
+        
 
         return (
             <div style={{
@@ -67,7 +82,6 @@ export class AssistantPrompt extends React.Component<AssistantProps, AssistantPr
                 position: 'relative',
                 margin: '24px'
             }}>
-
                 <TextArea
                     placeholder="Tell the assistant what you want to visualize"
                     style={{
@@ -87,6 +101,19 @@ export class AssistantPrompt extends React.Component<AssistantProps, AssistantPr
                     value={prompt}
                     onChange={this.handlePromptInput}
                 />
+                {!context && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: '-20px',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                        }}
+                    >
+                        <Tag icon={<ExclamationCircleOutlined/>} color='error'> No context selected!! </Tag>
+                    </div>
+                )}
+
                 <div
                     style={{
                         display: 'flex',
@@ -105,7 +132,7 @@ export class AssistantPrompt extends React.Component<AssistantProps, AssistantPr
                         <img src='/static/assets/images/assistant_prompt_attachment.svg' alt='Attachment' />
                     </span>
 
-                    <Button disabled={isLoading} onClick={this.handlePrompt} style={{
+                    <Button disabled={!context ||  isLoading} onClick={this.handlePrompt} style={{
                         padding: '20px',
                         background: `linear-gradient(90deg, #7472FF 0%, #265AD0 100%)`,
                         color: 'white',
@@ -131,8 +158,6 @@ export class AssistantPrompt extends React.Component<AssistantProps, AssistantPr
 
                         </span> &nbsp;Visualize&nbsp;
                     </Button>
-
-
                 </div>
 
             </div>

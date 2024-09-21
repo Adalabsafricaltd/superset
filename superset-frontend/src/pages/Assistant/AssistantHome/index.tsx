@@ -44,62 +44,22 @@ export class AssistantHome extends Component<AssistantProps, AssistantState> {
       categories: {
         categories: []
       },
+      currentContext: cleanDatasourceProps((this.props.data))
     };
   }
 
   async componentDidUpdate(prevProps: AssistantProps) {
-    console.log("Assistant Home Props: componentDidUpdate", this.props.conversation);
-    // only fetch suggestions when the data changes and after set timeout
-    if (this.timer) {
-      clearTimeout(this.timer);
+    console.log("Assistant Home Props: componentDidUpdate", cleanDatasourceProps((this.props.data)));
+    if (prevProps.data !== this.props.data) {
+      this.setState({
+        currentContext: cleanDatasourceProps(this.props.data)
+      });
     }
-    this.timer = setTimeout(async () => {
-      if (prevProps.data !== this.props.data) {
-        this.setState({ isLoadingSuggestions: true });
-        const cleaned = cleanDatasourceProps(this.props.data)
-        console.log("Assistant Home Props: componentDidUpdate", cleaned)
-        console.log("Fetching new suggestions");
-        // 1.Understanding clinical data
-        // 
-        const purpose = `
-          1. Understanding clinical data
-          2. Identifying trends in patient data
-          3. Predicting patient outcomes
-          4. Identifying high-risk patients
-          5. Understanding patient demographics
-          6. Identifying patient cohorts
-        `;
-        let suggestions: AssistantSuggestionProps[] = []
-        if (this.props.data.length > 0) {
-          suggestions = await getVizSuggestions(cleaned, purpose);
-        }
-        this.setState({
-          data: this.props.data,
-          isLoadingSuggestions: false,
-          categories: {
-            categories: [
-              {
-                categoryTitle: 'Visualization Suggestions',
-                categoryDescription: 'Suggested Alerts based on available data sources and data sets',
-                backgroundGradientStart: '#FF9398',
-                backgroundGradientEnd: '#FF4049',
-                suggestions: suggestions,
-                actions: this.props.actions,
-              },
-            ],
-          },
-        }, () => {
-          console.log("New Suggestions", this.state.categories);
-        });
-      }
-      if (prevProps.conversation !== this.props.conversation) {
-        this.setState({
-          conversation: this.props.conversation
-        }, () => {
-          this.chatScrollToEnd()
-        });
-      }
-    }, 1000);
+    if (prevProps.conversation !== this.props.conversation) {
+      this.setState({
+        conversation: this.props.conversation
+      }, this.chatScrollToEnd);
+    }
   }
 
   chatScrollToEnd() {
@@ -108,21 +68,18 @@ export class AssistantHome extends Component<AssistantProps, AssistantState> {
       chatContainerDiv.scrollBy({
         behavior: 'smooth',
         top: chatContainerDiv.scrollHeight
-        
       });
     }
   }
 
   componentDidMount() {
-    console.log("Assistant Home Props: componentDidMount", this.props.conversation);
+    console.log("Assistant Home Props: componentDidMount", cleanDatasourceProps((this.props.data)));
     this.chatScrollToEnd()
   }
 
   render() {
     const { user } = this.props;
     const { categories, isLoadingSuggestions, conversation } = this.state;
-
-    console.log("Assistant Home Props render", categories);
 
     return (
       <>
@@ -150,7 +107,7 @@ export class AssistantHome extends Component<AssistantProps, AssistantState> {
             flex: '0 0 auto',
             width: '100%',
           }} >
-            {(!conversation || conversation.length === 0) &&  <AssistantWelcomeMessage userFirsrName={user.firstName} />}
+            {(!conversation || conversation.length === 0) && <AssistantWelcomeMessage userFirsrName={user.firstName} />}
             {(!conversation || conversation.length === 0) && <AssistantSuggestionCategories {...categories} />}
           </div>
           <div
@@ -163,7 +120,7 @@ export class AssistantHome extends Component<AssistantProps, AssistantState> {
               display: 'flex',
               flexDirection: 'column',
             }}>
-           {conversation && <ChatMessages messages={conversation} />}
+            {conversation && <ChatMessages messages={conversation} />}
           </div>
           <div style={{
             flex: '0 0 auto',

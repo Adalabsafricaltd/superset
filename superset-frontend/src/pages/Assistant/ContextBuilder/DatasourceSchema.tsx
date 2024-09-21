@@ -82,7 +82,6 @@ export class DatasourceSchema extends Component<DatasourceSchemaProps, Datasourc
 
     async componentDidMount() {
         const { tables } = this.props;
-        console.log("DatasourceSchema Props componentDidMount ", this.props);
         if (tables?.length === 0) {
             this.handleRefresh();
         }
@@ -103,7 +102,7 @@ export class DatasourceSchema extends Component<DatasourceSchemaProps, Datasourc
 
 
     componentDidUpdate(prevProps: Readonly<DatasourceSchemaProps>, prevState: Readonly<DatasourceSchemaProps>, snapshot?: any): void {
-        console.log("DatasourceSchema Props componentDidUpdate", prevState);
+        
         if (prevProps.tables !== this.props.tables) {
             this.setState({ tables: this.props.tables });
         }

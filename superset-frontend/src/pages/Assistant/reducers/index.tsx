@@ -156,6 +156,10 @@ export default function AssistantReducer(
                             if (datasource.id !== updatedTable.databaseId){
                                 table.selected = false;
                                 table.selectedColumns = [];
+                                // update columns to unselected
+                                table.columns.forEach(column => {
+                                    column.selected = false;
+                                });
                             }
                             if (
                                 datasource.id === updatedTable.databaseId &&

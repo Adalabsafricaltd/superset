@@ -36,8 +36,15 @@ export const getTableDescription = async (data: any, target: string) => {
 
 // retains only selected data from array of DatasourceProps
 
-export function cleanDatasourceProps(data: DatasourceProps[]) {
-  return data.map(datasource => filterSelectedSchemas(datasource)).filter(datasource => datasource.schema.length > 0);
+export function cleanDatasourceProps(data: DatasourceProps[]):DatasourceProps | undefined {
+  if(!data){
+    return undefined
+  }
+  const clean = data.map(datasource => filterSelectedSchemas(datasource)).filter(datasource => datasource.schema.length > 0);
+  if (clean.length === 0) {
+    return undefined;
+  }
+  return clean[0]
 }
 
 function filterSelectedSchemas(data: DatasourceProps): DatasourceProps {
@@ -155,7 +162,7 @@ export function dbConnection(dbPk: number) {
 }
 
 export type PromptPayload = {
-  databaseId: string;
+  databaseId: number;
   context: {
     schemaName: string;
     description?: string;
@@ -173,12 +180,8 @@ export type PromptPayload = {
   prompt: string;
 };
 
-export function prompt(context: DatasourceProps, prompt: string) {
-  console.log("assistantUtils prompt context", context);
-  console.log("assistantUtils prompt prompt", prompt);
-
-  const endpoint = 'assistant/gemini/prompt';
-
+export function assistantPrompt(context: DatasourceProps, prompt: string) {
+  const endpoint = 'assistant/prompt';
   const data: PromptPayload = {
     databaseId: context.id,
     context: context.schema.map(schema => ({
@@ -198,13 +201,15 @@ export function prompt(context: DatasourceProps, prompt: string) {
     prompt: prompt
   };
 
+  console.log("assistantPrompt data", JSON.stringify(data));
+
   return SupersetClient.post({ endpoint: endpoint, body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
     .then((response) => {
-      console.log("assistantUtils prompt Response:", response);
+      console.log("assistantPrompt prompt Response:", response);
 
     })
     .catch((error) => {
-      console.error("assistantUtils prompt Error:", error);
+      console.error("assistantPrompt prompt Error:", error);
       throw error;
     });
 }

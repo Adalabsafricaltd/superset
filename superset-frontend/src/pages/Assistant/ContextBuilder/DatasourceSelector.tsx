@@ -28,8 +28,7 @@ export class DatasourceSelector extends Component<DatasourceSelectorProps, Datas
             ...props,
             loading: false
         };
-        console.log("DatasourceSelector Props", props);
-        console.log("DatasourceSelector State", this.state);
+        
     }
 
     async componentDidMount() {
@@ -47,7 +46,8 @@ export class DatasourceSelector extends Component<DatasourceSelectorProps, Datas
                 }));
                 this.props.actions.loadDataSourceProps(data);
             } catch (error) {
-                console.error('Failed to fetch database data', error);
+                // TODO Reload function
+                console.info("DatasourceSelector No reload function implemented yet");
             } finally {
                 this.setState({ loading: false });
             }
@@ -55,7 +55,6 @@ export class DatasourceSelector extends Component<DatasourceSelectorProps, Datas
     }
 
     componentDidUpdate(prevProps: Readonly<DatasourceSelectorProps>, prevState: Readonly<DatasourceSelectorState>, snapshot?: any): void {
-        console.log("DatasourceSelector Props componentDidUpdate", prevState);
         if (prevProps.datasources !== this.props.datasources) {
             this.setState({ datasources: this.props.datasources });
         }
