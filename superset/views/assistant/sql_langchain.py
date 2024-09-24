@@ -67,7 +67,7 @@ class SQLLangchain:
         )
         return _agent
     
-    def get_controls(self, controls, chat_meta_data, current_formdata):
+    def get_controls(self, controls, current_formdata, viz_type, instructions):
         """
         Returns modified formdata
         """
@@ -76,10 +76,25 @@ class SQLLangchain:
 
     def explain_describe(self, allowed_scope, target):
         """
+        allowed_scope -> [ {
+            schemaName: str,
+            tables: [{
+                tableName: str,
+                columns: [{
+                    columnName: str,
+                    dataType: str,
+                    key: str
+                }]
+            }]
+        } ]
         target -> table in allowed scope
         Return schema
         {
             "description": str
+            column: [{
+             columnName: str,
+             description: str,
+            }]
             ... any additional data 
         }
         """
@@ -95,10 +110,22 @@ class SQLLangchain:
             viz_type:[
                 {
                     viz_type: str,
-                    instructions: str,
+                    instructions: str, metrics, dimentions, metric labels, filters etc
+                    viz_title:str Title of the chart
                 }
             ]
 
         }
+        """
+        return None
+    
+    def viz_suggestion(self, allowed_scope, goal_or_intent):
+        """Return schema
+        [{
+            viz_type: str,
+            instructions: dict,
+            viz_title:str,
+            reasoning: str , # Why this viz type is suggested based on goal or intent
+        }]
         """
         return None
