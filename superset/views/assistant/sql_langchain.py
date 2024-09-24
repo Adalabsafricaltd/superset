@@ -67,8 +67,6 @@ class SQLLangchain:
         )
         return _agent
 
-
-    
     def prompt(self, allowed_scope, user_prompt):
         # Send user's prompt to agent
         human_message = HumanMessage(user_prompt)
