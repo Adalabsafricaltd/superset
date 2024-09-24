@@ -90,7 +90,7 @@ class SQLLangchain:
         target -> table in allowed scope
         Return schema
         {
-            "description": str
+            description: str
             column: [{
              columnName: str,
              description: str,
@@ -110,7 +110,7 @@ class SQLLangchain:
             viz_type:[
                 {
                     viz_type: str,
-                    instructions: str, metrics, dimentions, metric labels, filters etc
+                    instructions: str # metrics, dimentions, metric labels, filters etc
                     viz_title:str Title of the chart
                 }
             ]
