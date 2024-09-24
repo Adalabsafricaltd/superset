@@ -119,7 +119,7 @@ class SQLLangchain:
         """
         return None
     
-    def viz_suggestion(self, allowed_scope, goal_or_intent):
+    def viz_suggestion(self, allowed_scope, goal_or_intent, number_of_suggestions=4):
         """Return schema
         [{
             viz_type: str,
