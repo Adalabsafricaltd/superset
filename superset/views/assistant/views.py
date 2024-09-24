@@ -13,7 +13,7 @@ import logging
 import os
 import base64
 from superset.views.assistant.support import AssistantSupport
-from superset.views.assistant.sql_langchain_azure_open_ai import SQLLangchainAzureOpenAI
+from superset.views.assistant.sql_langchain import SQLLangchain
 from superset.daos.database import DatabaseDAO
 from superset.commands.database.exceptions import DatabaseNotFoundError
 from typing import cast
@@ -152,7 +152,9 @@ class AssistantView(BaseSupersetView):
         # self.logger.info(f"Database ID: {databaseId}")
         # self.logger.info(f"Context: {allowed_scope}")
         # self.logger.info(f"Prompt: {prompt}")
-        azureLang = SQLLangchainAzureOpenAI(databaseId)
+        azureLang = SQLLangchain(databaseId)
+        if not azureLang.isValid():
+            raise Exception(f"Database ID {databaseId} is invalid")
         response = azureLang.prompt(allowed_scope,prompt)
         # self.logger.info(f"Response: {response}")
         return self.json_response(response)

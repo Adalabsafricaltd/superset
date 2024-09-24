@@ -1,0 +1,159 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "QueryFormData",
+  "type": "object",
+  "properties": {
+    "datasource": {
+      "type": "string",
+      "description": "datasource identifier ${id}_${type}"
+    },
+    "viz_type": {
+      "type": "string",
+      "description": "visualization type"
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/QueryFormMetric"
+      }
+    },
+    "where": {
+      "type": "string"
+    },
+    "columns": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/QueryFormColumn"
+      }
+    },
+    "groupby": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/QueryFormColumn"
+      }
+    },
+    "all_columns": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/QueryFormColumn"
+      }
+    },
+    "adhoc_filters": {
+      "type": ["array", "null"],
+      "items": {
+        "$ref": "#/definitions/AdhocFilter"
+      }
+    },
+    "extra_filters": {
+      "type": ["array", "null"],
+      "items": {
+        "$ref": "#/definitions/QueryFormExtraFilter"
+      }
+    },
+    "extra_form_data": {
+      "$ref": "#/definitions/ExtraFormData"
+    },
+    "order_desc": {
+      "type": "boolean"
+    },
+    "row_limit": {
+      "type": ["string", "number", "null"]
+    },
+    "row_offset": {
+      "type": ["string", "number", "null"]
+    },
+    "force": {
+      "type": "boolean"
+    },
+    "result_format": {
+      "type": "string"
+    },
+    "result_type": {
+      "type": "string"
+    },
+    "annotation_layers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/AnnotationLayer"
+      }
+    },
+    "url_params": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "custom_params": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "series_columns": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/QueryFormColumn"
+      }
+    },
+    "series_limit": {
+      "type": "number"
+    },
+    "series_limit_metric": {
+      "$ref": "#/definitions/QueryFormMetric"
+    },
+    "granularity": {
+      "type": "string"
+    },
+    "granularity_sqla": {
+      "type": "string"
+    },
+    "time_grain_sqla": {
+      "$ref": "#/definitions/TimeGranularity"
+    },
+    "having": {
+      "type": "string"
+    }
+  },
+  "required": ["datasource", "viz_type"],
+  "definitions": {
+    "QueryFormMetric": {
+      "oneOf": [
+        { "$ref": "#/definitions/SavedMetric" },
+        { "$ref": "#/definitions/AdhocMetric" }
+      ]
+    },
+    "QueryFormColumn": {
+      "oneOf": [
+        { "$ref": "#/definitions/PhysicalColumn" },
+        { "$ref": "#/definitions/AdhocColumn" }
+      ]
+    },
+    "AdhocFilter": {
+      "type": "object"
+    },
+    "QueryFormExtraFilter": {
+      "type": "object"
+    },
+    "ExtraFormData": {
+      "type": "object"
+    },
+    "AnnotationLayer": {
+      "type": "object"
+    },
+    "TimeGranularity": {
+      "type": "string"
+    },
+    "SavedMetric": {
+      "type": "string"
+    },
+    "AdhocMetric": {
+      "type": "object"
+    },
+    "PhysicalColumn": {
+      "type": "object"
+    },
+    "AdhocColumn": {
+      "type": "object"
+    }
+  }
+}
