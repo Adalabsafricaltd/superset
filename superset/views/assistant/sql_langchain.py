@@ -66,11 +66,39 @@ class SQLLangchain:
             agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
         )
         return _agent
+    
+    def get_controls(self, controls, chat_meta_data, current_formdata):
+        """
+        Returns modified formdata
+        """
+        return None
 
+
+    def explain_describe(self, allowed_scope, target):
+        """
+        target -> table in allowed scope
+        Return schema
+        {
+            "description": str
+            ... any additional data 
+        }
+        """
+        return None
+
+    # Chat
+    
     def prompt(self, allowed_scope, user_prompt):
-        # Send user's prompt to agent
-        human_message = HumanMessage(user_prompt)
-        self.logger.info(f"User prompt:=> {user_prompt}")
-        agent_response = self.agent.invoke(human_message)
-        self.logger.info(f"Agent response:=> {agent_response.text}")
-        return agent_response
+        """Return schema
+        {
+            ai_response: str||markup,
+            sql_query: str
+            viz_type:[
+                {
+                    viz_type: str,
+                    instructions: str,
+                }
+            ]
+
+        }
+        """
+        return None
