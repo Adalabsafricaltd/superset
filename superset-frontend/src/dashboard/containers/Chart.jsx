@@ -40,6 +40,7 @@ import Chart from 'src/dashboard/components/gridComponents/Chart';
 import { PLACEHOLDER_DATASOURCE } from 'src/dashboard/constants';
 import ChartControlsPeek from 'src/pages/Assistant/ChartControlsPeek';
 import { data } from 'jquery';
+import { ChartExplainer } from 'src/pages/Assistant/ChartExplainer';
 
 
 const EMPTY_OBJECT = {};
@@ -139,7 +140,7 @@ function AssistantChartWrapper(WrappedComponent) {
 
         }}
       >
-        <ChartControlsPeek {...{
+        <ChartExplainer {...{
           ...props,
           form_data: props.formData,
           datasource: props.datasource,
