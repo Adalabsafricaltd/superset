@@ -10,8 +10,6 @@ class ChartControl:
     def create_chart_payload(self):
         datasource_id = self.datasource_id
         chart_type = self.chart_type
-        x_axis = "Id"
-        y_axis = "Name"
        
         
         if chart_type == "pie":
@@ -19,12 +17,12 @@ class ChartControl:
                         "time_range": "No filter",
                         "metric": {
                             "expressionType": "SQL",
-                            "sqlExpression":f"COUNT('{y_axis}')",
+                            "sqlExpression":"COUNT('Name')",
                             "label": "Values",
                             "optionName": "metric_1"
                         },
                         "adhoc_filters": [],
-                        "groupby": [f"{y_axis}"],
+                        "groupby": ["Name"],
                         "columns": [],
                         "row_limit": 1000,
                         "color_scheme": "bnbColors",
@@ -47,12 +45,17 @@ class ChartControl:
                             "time_range": "No filter",
                             "metrics": {
                                 "expressionType": "SQL",
-                                "sqlExpression":f"COUNT('{y_axis}')",
+                                # "column": {
+                                #     "column_name": "Name",
+                                #     "type": "VARCHAR"
+                                # },
+                                # "aggregate": "COUNT",
+                                "sqlExpression":"COUNT('Name')",
                                 "label": "Values",
                                 "optionName": "metric_2"
                             },
                             "adhoc_filters": [],
-                            "groupby": [f"{y_axis}"],
+                            "groupby": ["Name"],
                             "columns": [],
                             "row_limit": 1000,
                             "color_scheme": "bnbColors",
@@ -71,25 +74,10 @@ class ChartControl:
                     "y_axis_label": "Values",
                     "y_axis_format": "d",
                     "bar_stacked": False,
-                    "x_axis":f"{x_axis}"
+                    "x_axis":"Id"
                 })
             }
         elif chart_type == "area":
-            common_params = {
-                            "time_range": "No filter",
-                            "metrics": {
-                                "expressionType": "SQL",
-                                "sqlExpression":f"COUNT('{y_axis}')",
-                                "label": "Values",
-                                "optionName": "metric_3"
-                            },
-                            "adhoc_filters": [],
-                            "groupby": [f"{y_axis}"],
-                            "columns": [],
-                            "row_limit": 1000,
-                            "color_scheme": "bnbColors",
-                            "show_legend": True
-                        }
             return {
                 "slice_name": "Test Area Chart",
                 "viz_type": "echarts_area",
@@ -101,7 +89,6 @@ class ChartControl:
                     "y_axis_label": "Values",
                     "y_axis_format": "d",
                     "stacked_style": "normal",
-                    "x_axis":f"{x_axis}"
                 })
             }
         else:

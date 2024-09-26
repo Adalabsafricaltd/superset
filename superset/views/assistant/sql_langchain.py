@@ -23,8 +23,8 @@ from .chart_control import ChartControl
 #     query: str = Field(description="SQL query to retrieve data used for chat if applicable empty if not")
 
 # output_parser = PydanticOutputParser(pydantic_object=MessageOutput)
-control=ChartControl(50,'bar')
-control.create_chart_in_superset()
+control=ChartControl(50,'pie')
+# control.create_chart_in_superset()
 
 class SQLLangchain:
 
