@@ -117,12 +117,12 @@ export function saveChartExample(viz_type: string, controls: any, formData: any)
 }
 
 
-export function getChartControlValues(prompt: string, viz_type: string, datasource: any) {
+export function getChartControlValues(instruction:string, controls: {}, formData: {}) {
   const endpoint = 'assistant/gemini/get-control-values';
   const data = {
-    prompt: prompt,
-    viz_type: viz_type,
-    datasource: datasource
+    instruction: instruction,
+    controls: controls,
+    formData: formData
   };
   return SupersetClient.post({ endpoint: endpoint, body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
     .then((response) => {

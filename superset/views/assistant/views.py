@@ -316,71 +316,24 @@ class AssistantView(BaseSupersetView):
     #     self.support.add_example(viz_type, formData, controls)
     #     return self.json_response({"message": "Saved"})
     
-    # @expose("/gemini/get-control-values", methods=["POST"])
-    # def get_control_values(self) -> FlaskResponse:
-    #     """ Request schema
-    #     {
-    #         viz_type: string,
-    #         datasource: {},
-    #         prompt: string, from llm_optimized
-    #     }
-    #     """
-    #     body = request.json
-    #     viz_suggestion = body["viz_type"]
-    #     datasource = body["datasource"]
-    #     prompt = body["prompt"]
+    @expose("/gemini/get-control-values", methods=["POST"])
+    def get_control_values(self) -> FlaskResponse:
+        """ Request schema
+        {
+            instruction: string,
+            controls: {},
+            formData: string, from llm_optimized
+        }
+        """
+        body = request.json
+        instruction = body["instruction"]
+        controls = body["controls"]
+        formData = body["formData"]
+        viz_type = formData["viz_type"]
+        self.logger.info(f"Getting control values for {viz_type}")
+        new_form_controls = {}
 
-    #     self.logger.info(f"Viz Type: {viz_suggestion}")
-
-    #     viz_examples = self.support.get_examples(viz_suggestion)
-    #     viz_example_controls = self.support.get_controls(viz_suggestion)
-    #     viz_example_datasource = self.support.get_datasource_from(viz_suggestion)
-
-    #     self.logger.info(f"Viz Examples: {viz_examples}")
-    #     self.logger.info(f"Viz Example Controls: {viz_example_controls}")
-    #     self.logger.info(f"Viz Example Datasource: {viz_example_datasource}")
-        
-    #     chat_session = self.model.start_chat(
-    #         history=[
-    #             {
-    #                 "role": "user",
-    #                 "parts": [
-    #                     f"""
-    #                     The following is an example chart configuration for a {viz_suggestion} chart thats been created by the charts controls
-    #                     {viz_suggestion}_Controls = {viz_example_controls} using the following datasource
-    #                     {viz_suggestion}_Datasource = {viz_example_datasource}
-    #                     {viz_suggestion}_Control_Values = {viz_examples}
-    #                     Using the new {viz_suggestion}_Datasource below,
-    #                     New_{viz_suggestion}_Datasource = {datasource},
-    #                     Create a new {viz_suggestion}_Control_Values that will best FIT THE INSTRUCTIONS in the prompt below.
-    #                     Prompt = {prompt}
-    #                     Response should be a single json object with structure similar to the objects in {viz_suggestion}_Control_Values list
-    #                     Do not use the {viz_suggestion}_Control_Values values in the response.
-    #                     Do not add any new keys not present in the {viz_suggestion}_Control.
-                         
-    #                     Use specific column_name specified in the New_{viz_suggestion}_Datasource.
-    #                     Do not use any column_name not listed in the New_{viz_suggestion}_Datasource.
-    #                     Do not use any aggregate functions not supported by SQL.
-                        
-    #                     Please make sure all columns and metrics have a unique label.
-                        
-    #                     Response should be a valid json format i.e use correct boolean, integer and string values.
-    #                     Boolean values should be true or false. not True or False. i.e lowercase.
-    #                     Column names placed in lists NOT should be enclosed in quotes. ie ["column_name"] not ["\"column_name\""] E.G. "some_key": ["column_name", "column_name_2", "column_name_3"]
-    #                     do not return keys with null or undefined values.
-    #                     Response should be a single valid json object.
-    #                     """
-    #                 ],
-    #             }
-    #         ]
-    #     )
-        
-    #     response = chat_session.send_message(f"""
-    #         Using the instruction in the prompt below, create a new {viz_suggestion}_Control_Values that will best FIT THE INSTRUCTIONS in the prompt below.
-    #         Prompt = {prompt}
-    #     """)
-    #     self.logger.info(f"Response: {response.text}")
-    #     return self.json_response(response.text)
+        return self.json_response(new_form_controls)
     
     # def upload_to_genai(self, fileData):
     #     self.logger.info(f"Uploading to GenAI: {fileData}")
