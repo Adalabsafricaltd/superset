@@ -14,6 +14,7 @@ from langchain.agents.agent_types import AgentType
 from pydantic import BaseModel, Field
 from langchain_core.output_parsers.pydantic import PydanticOutputParser
 
+from .chart_control import ChartControl
 # class MessageOutput(BaseModel):
 #     message: str = Field(description="The message from the agent")
 #     suggestion: list[str] = Field(description="Suggest additional queries to supplement the message")
@@ -22,6 +23,8 @@ from langchain_core.output_parsers.pydantic import PydanticOutputParser
 #     query: str = Field(description="SQL query to retrieve data used for chat if applicable empty if not")
 
 # output_parser = PydanticOutputParser(pydantic_object=MessageOutput)
+control=ChartControl(50,'bar')
+control.create_chart_in_superset()
 
 class SQLLangchain:
 
@@ -67,7 +70,7 @@ class SQLLangchain:
         )
         return _agent
     
-    def get_controls(self, controls, current_formdata, viz_type, instructions):
+    def get_controls(self, controls, chat_meta_data, current_formdata):
         """
         Returns modified formdata
         """
@@ -76,25 +79,10 @@ class SQLLangchain:
 
     def explain_describe(self, allowed_scope, target):
         """
-        allowed_scope -> [ {
-            schemaName: str,
-            tables: [{
-                tableName: str,
-                columns: [{
-                    columnName: str,
-                    dataType: str,
-                    key: str
-                }]
-            }]
-        } ]
         target -> table in allowed scope
         Return schema
         {
-            description: str
-            column: [{
-             columnName: str,
-             description: str,
-            }]
+            "description": str
             ... any additional data 
         }
         """
@@ -110,22 +98,10 @@ class SQLLangchain:
             viz_type:[
                 {
                     viz_type: str,
-                    instructions: str # metrics, dimentions, metric labels, filters etc
-                    viz_title:str Title of the chart
+                    instructions: str,
                 }
             ]
 
         }
-        """
-        return None
-    
-    def viz_suggestion(self, allowed_scope, goal_or_intent, number_of_suggestions=4):
-        """Return schema
-        [{
-            viz_type: str,
-            instructions: dict,
-            viz_title:str,
-            reasoning: str , # Why this viz type is suggested based on goal or intent
-        }]
         """
         return None
