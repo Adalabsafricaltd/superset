@@ -37,10 +37,10 @@ class ChartControl:
                 "datasource_type": "table",
                 # "params": json.dumps({**form_data, **common_params}),
                 # "chart_id": form_data["slice_id"]
-                "params": json.dumps({
+                # "params": json.dumps({
                     **common_params,
                     "label_type": "value"  # Options: 'value', 'percent'
-                })
+                # })
             }
         elif chart_type == "bar":
             common_params = {
@@ -64,15 +64,15 @@ class ChartControl:
                 "viz_type": "echarts_timeseries_bar",
                 "datasource_id": datasource_id,
                 "datasource_type": "table",
-                "params": json.dumps({
-                    **common_params,
-                    "label_type": "value",
-                    "x_axis_label": "Category",
-                    "y_axis_label": "Values",
-                    "y_axis_format": "d",
-                    "bar_stacked": False,
-                    "x_axis":f"{x_axis}"
-                })
+                # "params": 
+                "label_type": "value",
+                "x_axis_label": "Category",
+                "y_axis_label": "Values",
+                "y_axis_format": "d",
+                "bar_stacked": False,
+                "x_axis":f"{x_axis}",
+                **common_params
+                
             }
         elif chart_type == "area":
             common_params = {
@@ -95,14 +95,14 @@ class ChartControl:
                 "viz_type": "echarts_area",
                 "datasource_id": datasource_id,
                 "datasource_type": "table",
-                "params": json.dumps({
+                # "params": json.dumps({
                     **common_params,
                     "x_axis_label": "Category",
                     "y_axis_label": "Values",
                     "y_axis_format": "d",
                     "stacked_style": "normal",
                     "x_axis":f"{x_axis}"
-                })
+                # })
             }
         else:
             raise ValueError(f"Unsupported chart type: {chart_type}")

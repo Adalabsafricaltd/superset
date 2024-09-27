@@ -335,7 +335,11 @@ class AssistantView(BaseSupersetView):
         self.logger.info(f"Getting control values for {viz_type}")
         new_form_controls = {}
         #----------------ADD CHART CONTROLS
-        control=ChartControl(50,'bar')
+        chartid=controls['datasource']['datasource']['id']
+        chartid=int(chartid)
+        charttype=controls['viz_type']['value']
+        
+        control=ChartControl(chartid,charttype)
         new_form_controls = control.create_chart_payload()
         return self.json_response(new_form_controls)
     

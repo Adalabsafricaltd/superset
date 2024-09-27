@@ -125,9 +125,9 @@ export function getChartControlValues(instruction:string, controls: {}, formData
     formData: formData
   };
   return SupersetClient.post({ endpoint: endpoint, body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
-    .then((response) => {
-      console.log("assistantUtils getChartControlValues Response:", response);
-      return JSON.parse(response.json)
+    .then(({json}) => {
+      console.log("assistantUtils getChartControlValues Response:", json);
+      return json
     });
 }
 
