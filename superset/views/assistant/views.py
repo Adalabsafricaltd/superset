@@ -18,6 +18,8 @@ from superset.daos.database import DatabaseDAO
 from superset.commands.database.exceptions import DatabaseNotFoundError
 from typing import cast
 from superset.models.core import Database
+from .chart_control import ChartControl
+
 
 class AssistantView(BaseSupersetView):
 
@@ -332,7 +334,9 @@ class AssistantView(BaseSupersetView):
         viz_type = formData["viz_type"]
         self.logger.info(f"Getting control values for {viz_type}")
         new_form_controls = {}
-
+        #----------------ADD CHART CONTROLS
+        control=ChartControl(50,'bar')
+        new_form_controls = control.create_chart_payload()
         return self.json_response(new_form_controls)
     
     # def upload_to_genai(self, fileData):

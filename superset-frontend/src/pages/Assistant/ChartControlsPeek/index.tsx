@@ -76,8 +76,8 @@ function ChartControlsPeek(props: any) {
 
     const handleUpdateData = () => {
         const { setExploreControls, onQuery } = props.actions
-        console.log('ChartControlsPeek => handleUpdateData => setExploreControls:', setExploreControls)
-        console.log('ChartControlsPeek => handleUpdateData => onQuery:', onQuery)
+        // console.log('ChartControlsPeek => handleUpdateData => setExploreControls:', setExploreControls)
+        console.log('ChartControlsPeek => handleUpdateData =>:', formDataLcl)
         setExploreControls(formDataLcl);
         onQuery();
     };
@@ -107,6 +107,7 @@ function ChartControlsPeek(props: any) {
 
         const formData = await getChartControlValues(description, internalProps.controls, formDataLcl);
         // Update current form data with the assistant form data .. new data may not have all the keys
+        console.log('===========CONTROL CHECK', formData)
         const newFormData: QueryFormData = {
             ...formDataLcl,
             ...formData
