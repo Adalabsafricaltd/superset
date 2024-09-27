@@ -136,13 +136,14 @@ class AssistantView(BaseSupersetView):
         allowed_scope = body["context"]
         prompt = body["prompt"]
         databaseId = body["databaseId"]
+        history = body["history"]
         # self.logger.info(f"Database ID: {databaseId}")
         # self.logger.info(f"Context: {allowed_scope}")
         # self.logger.info(f"Prompt: {prompt}")
         azureLang = SQLLangchain(databaseId)
         if not azureLang.isValid():
             raise Exception(f"Database ID {databaseId} is invalid")
-        response = azureLang.prompt(allowed_scope,prompt)
+        response = azureLang.prompt(allowed_scope,history,prompt)
         # self.logger.info(f"Response: {response}")
         return self.json_response(response)
     

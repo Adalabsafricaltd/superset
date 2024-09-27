@@ -103,7 +103,7 @@ class SQLLangchain:
 
     # Chat
     
-    def prompt(self, allowed_scope, user_prompt):
+    def prompt(self, allowed_scope, history, user_prompt):
         """Return schema
         {
             ai_response: str||markup,
