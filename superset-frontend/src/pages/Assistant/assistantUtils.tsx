@@ -3,6 +3,7 @@ import { AssistantSuggestionProps } from "./AssistantHome/AssistantSuggestion";
 import { DatasourceProps } from "./ContextBuilder/Datasource";
 import { DatasourceTableProps } from "./ContextBuilder/DatasourceTable";
 import { DatasourceSchemaProps } from "./ContextBuilder/DatasourceSchema";
+import { ChatMessageProps } from "./ChatMessages/ChatMessage";
 
 interface Descriptions {
   human_understandable: string,
@@ -18,9 +19,9 @@ export const getTableDescription = async (data: any, target: string) => {
   }
   console.log("getTableDescription : Request", request);
   try {
-    const response = await SupersetClient.post({ endpoint: endpoint, body: JSON.stringify(request), headers: { 'Content-Type': 'application/json' } });
+    const {json} = await SupersetClient.post({ endpoint: endpoint, body: JSON.stringify(request), headers: { 'Content-Type': 'application/json' } });
     // console.log("Response", response.json);
-    const responseJson = JSON.parse(response.json);
+    const responseJson = json
     // console.log("Response 2", responseJson);
     const descriptions: Descriptions = {
       human_understandable: responseJson["human_understandable"],
@@ -83,9 +84,9 @@ export const getVizSuggestions = async (data: DatasourceProps[], purpose: string
   }
   // console.log("getVizSuggestions: Request", request);
   try {
-    const response = await SupersetClient.post({ endpoint: endpoint, body: JSON.stringify(request), headers: { 'Content-Type': 'application/json' } });
+    const {json} = await SupersetClient.post({ endpoint: endpoint, body: JSON.stringify(request), headers: { 'Content-Type': 'application/json' } });
     // console.log("getVizSuggestions: Response", response.json);
-    const responseJson = JSON.parse(response.json);
+    const responseJson = json
     // console.log("getVizSuggestions : Response 2", responseJson);
     const suggestions = responseJson.map((r: any) => {
       const suggestion: AssistantSuggestionProps = {
@@ -125,9 +126,9 @@ export function getChartControlValues(instruction:string, controls: {}, formData
     formData: formData
   };
   return SupersetClient.post({ endpoint: endpoint, body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
-    .then((response) => {
-      console.log("assistantUtils getChartControlValues Response:", response);
-      return JSON.parse(response.json)
+    .then(({json}) => {
+      console.log("assistantUtils getChartControlValues Response:", json);
+      return json
     });
 }
 
@@ -141,9 +142,9 @@ export function getChartExplanation(datasource: any, controls: any, form_data: a
   };
   console.log("assistantUtils getChartExplanation data", JSON.stringify(data));
   return SupersetClient.post({ endpoint: endpoint, body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
-    .then((response) => {
-      console.log("assistantUtils getChartExplanation Response:", response);
-      return JSON.parse(response.json)
+    .then(({json}) => {
+      console.log("assistantUtils getChartExplanation Response:", json);
+      return json
     });
 }
 
@@ -176,11 +177,15 @@ export type PromptPayload = {
         columnDescription?: string
       }[];
     }[];
-  }[]
+  }[];
+  history:{
+    user: string,
+    assistant:any,
+  }[];
   prompt: string;
 };
 
-export function assistantPrompt(context: DatasourceProps, prompt: string) {
+export function assistantPrompt(context: DatasourceProps, conversation:ChatMessageProps[], prompt: string) {
   const endpoint = 'assistant/prompt';
   const data: PromptPayload = {
     databaseId: context.id,
@@ -198,18 +203,34 @@ export function assistantPrompt(context: DatasourceProps, prompt: string) {
         }))
       }))
     })),
+    history:  (conversation ? conversation : []).map(({prompt, response}) => ({
+      user: prompt?.prompt ?? '',
+      assistant: response ?? null
+    })),
     prompt: prompt
   };
 
   console.log("assistantPrompt data", JSON.stringify(data));
 
   return SupersetClient.post({ endpoint: endpoint, body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
-    .then((response) => {
-      console.log("assistantPrompt prompt Response:", response);
-
+    .then(({json}) => {
+      console.log("assistantPrompt prompt Response:", json);
+      return json
     })
     .catch((error) => {
       console.error("assistantPrompt prompt Error:", error);
       throw error;
     });
+}
+
+export function nextQuestion( conversation : {
+  question:string,
+  answer: string
+}[]){
+  const endpoint = `assistant/questionnaire`
+  return SupersetClient.post({endpoint: endpoint, body: JSON.stringify({conversation}), headers: { 'Content-Type': 'application/json' } })
+  .then(({json})=>{
+    console.log("assistantUtils nextQuestion Response: ", json)
+    return json
+  })
 }

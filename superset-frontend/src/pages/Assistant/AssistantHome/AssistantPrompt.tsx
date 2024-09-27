@@ -5,12 +5,14 @@ import { DatasourceProps } from '../ContextBuilder/Datasource';
 import { v4 as uuid } from 'uuid'
 import { assistantPrompt } from '../assistantUtils'
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { ChatMessageProps } from '../ChatMessages/ChatMessage';
 const { TextArea } = Input;
 
 
 export interface AssistantProps {
     context?: DatasourceProps,
-    actions: AssistantActionsType
+    actions: AssistantActionsType,
+    conversation: ChatMessageProps[]
 }
 
 export interface AssistantPromptState extends AssistantProps {
@@ -43,21 +45,31 @@ export class AssistantPrompt extends React.Component<AssistantProps, AssistantPr
                 context: this.props.context
             })
         }
+
+        if (prevProps.conversation !== this.props.conversation){
+            this.setState({
+                conversation: this.props.conversation
+            })
+        }
     }
 
     handlePrompt = async () => {
         this.setState({ isLoading: true })
         
         const promptId = uuid()
-        const {prompt , context} = this.state
+        const {prompt , context, conversation} = this.state
         console.log("handlePrompt => ", promptId, prompt, context)
         if( prompt.length > 0 && context){
             this.props.actions.newPrompt(promptId, { prompt })
-            const response = await assistantPrompt(context, prompt)
-            
+            const { ai_response, sql_query, viz_type  } = await assistantPrompt(context,conversation, prompt)
+            this.props.actions.updatePromptResponse(promptId, {
+                message: ai_response,
+                sql_query: sql_query? sql_query : "",
+                viz_type: viz_type,
+                can_be_visualized: viz_type ? "true" : "false"
+            })
         }
-        this.props.actions.updatePromptResponse(promptId, { message: "some message that may make sense", sql_query: "SELECT SOME DATA FROM DATABASE", can_be_visualized: "true" })
-
+        
         this.setState({ isLoading: false, prompt: '' })
     }
 
@@ -156,7 +168,8 @@ export class AssistantPrompt extends React.Component<AssistantProps, AssistantPr
                             {isLoading && <Spin size='small' />}
                             {!isLoading && <img src='/static/assets/images/assistant_prompt_send.svg' alt='v_logo' />}
 
-                        </span> &nbsp;Visualize&nbsp;
+                        </span> 
+                        {/* &nbsp;Visualize&nbsp; */}
                     </Button>
                 </div>
 

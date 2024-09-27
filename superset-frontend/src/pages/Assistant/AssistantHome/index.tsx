@@ -128,7 +128,7 @@ export class AssistantHome extends Component<AssistantProps, AssistantState> {
             alignSelf: 'flex-end',
             width: '100%',
           }}>
-            <AssistantPrompt context={this.state.currentContext} actions={this.props.actions} />
+            <AssistantPrompt context={this.state.currentContext} actions={this.props.actions} conversation={conversation} />
           </div>
         </div>
         {isLoadingSuggestions && <Loading />}

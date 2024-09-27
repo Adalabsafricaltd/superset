@@ -14,6 +14,7 @@ import os
 import base64
 from superset.views.assistant.support import AssistantSupport
 from superset.views.assistant.sql_langchain import SQLLangchain
+from superset.views.assistant.context_chain import ContextQuestionnaire
 from superset.daos.database import DatabaseDAO
 from superset.commands.database.exceptions import DatabaseNotFoundError
 from typing import cast
@@ -88,6 +89,7 @@ class AssistantView(BaseSupersetView):
     datamodel = SQLAInterface(Database)
     route_base = "/assistant"
     default_view = "root"
+    context_questionnaire = ContextQuestionnaire()
 
     geminiApiKey = current_app.config.get("GEMINI_API_KEY")
     # genai.configure(api_key=geminiApiKey)
@@ -115,21 +117,6 @@ class AssistantView(BaseSupersetView):
     def root(self) -> FlaskResponse:
         """ Assistant Home Page """
         return self.render_app_template()
-
-    # endpoint /gemini/db/{dbPk} 
-    @expose("/gemini/db/<int:dbPk>", methods=["GET"])
-    def dbTest(self, dbPk) -> FlaskResponse:
-        """ Test DB Connection """
-        self.logger.info(f"Database => {dbPk}")
-        database = cast(Database, DatabaseDAO.find_by_id(dbPk))
-        if not database:
-            raise DatabaseNotFoundError()
-        # Get DB Connection
-        self.logger.info(f"Database => {dbPk} info: {database.sqlalchemy_uri_decrypted}")
-        azureLang = SQLLangchainAzureOpenAI(dbPk)
-        azureLang.initialize()
-
-        return self.json_response(f"DB ID {dbPk}")
     
     @expose("/prompt", methods=["POST"])
     def prompt(self) -> FlaskResponse:
@@ -160,65 +147,30 @@ class AssistantView(BaseSupersetView):
         return self.json_response(response)
     
     
-     # Api to interact with gemini and get table descriptions
-    # @expose("/gemini/table", methods=["POST"])
-    # @safe
-    # def gemini(self) -> FlaskResponse:
+    #  Api to interact with gemini and get table descriptions
+    @expose("/gemini/table", methods=["POST"])
+    @safe
+    def gemini(self) -> FlaskResponse:
         
-    #     """ Request schema 
-    #     {
-    #         data: string,
-    #         table_name: string
-    #     }
+        """ Request schema 
+        {
+            data: string,
+            table_name: string
+        }
 
-    #     'data' is a string containing the json schema of the database see ./samples/gemini_table_data.json
+        'data' is a string containing the json schema of the database see ./samples/gemini_table_data.json
 
-    #     """
-    #     body = request.json
-    #     data = body["data"]
-    #     target = body["table_name"]
-    #     chat_session = self.model.start_chat(
-    #         history=[
-    #             {
-    #                 "role": "user",
-    #                 "parts": [
-    #                     f""" 
-    #                     The following is a json schema containing data about a database Schema = {data}
-    #                     Using the Data provided by the Schema Answer the question in the prompt below. in the following format.
-    #                     Ensure the Format is a valid json format.
-    #                     Format =
-    #                         {{ 
-    #                         "human_understandable: "The response should be assertive, The response should be a single line only and include column descriptions as well".
-    #                         "llm_optimized":"The response should contain all relevant information that may be used by an llm to probe for more information. include data types and formats as well. Include potential relationships with other selected tables"
-    #                         }}
-    #                     """,
-    #                 ],
-    #             },
-    #             {
-    #                 "role": "model",
-    #                 "parts": [
-    #                     """
-    #                     {{
-    #                         "human_understandable":"The table 'bart_lines' contains data about different BART lines, including the line's name, color, a path represented in a JSON format and a polyline.", 
-    #                         "llm_optimized":"The table 'bart_lines' contains data about different BART lines. Each row represents a different BART line. The columns contain the following information: 'name': the name of the BART line, 'color': the color of the BART line, 'path_json': the path of the BART line in JSON format, 'polyline': a polyline representing the path of the BART line."
-    #                     }}
-    #                     """
-    #                 ],
-    #             },
-    #         ]
-    #     )
-    #     inputPrompt =   f"""
-    #                     Prompt = Please give a reasonable description of the data contained in the table named {target}.
-    #                 """
-
-    #     response = chat_session.send_message(inputPrompt)
-    #     self.logger.info(f"Response: {response.text}")
-    #     return self.json_response(response.text)
+        """
+        body = request.json
+        data = body["data"]
+        target = body["table_name"]
+        response = {}
+        return self.json_response(response)
     
-    # # Api to interact with gemini and get visualization suggestions
-    # @expose("/gemini/viz-suggestions", methods=["POST"])
-    # @safe
-    # def geminiViz(self) -> FlaskResponse:
+    # Api to interact with gemini and get visualization suggestions
+    @expose("/gemini/viz-suggestions", methods=["POST"])
+    @safe
+    def geminiViz(self) -> FlaskResponse:
         """ Request schema
         {
             data: string,
@@ -230,71 +182,8 @@ class AssistantView(BaseSupersetView):
         body = request.json
         data = body["data"]
         purpose = body["purpose"]
-        chat_session = self.model.start_chat(
-            history=[
-            {
-                "role": "user",
-                "parts": [
-                f"""
-                The following is a json schema containing data about database Schemas = {data}
-                The data contains information collected by an organization for the purpose of {purpose}.
-                Using the Data provided by the Schema, provide suggestions for visualizations that can be created from the data that may be useful to the organization.
-                Available visualizations are: {self.available_charts}.
-                Order the suggestions according to importance and relevance to the organization's purpose.
-                The response should be in the following format:
-                - Avoid referencing the organization or its purpose in the response.
-                - Do not use data whose "selected" key is false.
-                - Do not use tables whose "data" key is not present or is an empty list or dictionary.
-                - Do not suggest a viz_type if the query needed to generate the visualization cannot provide the data needed for the visualization.
-                - Do not suggest a viz_type that is not available in the Available visualizations.
-                - Only suggest a maximum of 5 visualizations.
-                - Only use data from above to generate the response.
-
-                
-                
-                Format:
-                [
-                    {{
-                    "viz_type": "viz_type",
-                    "description": "short one-sentence description of the visualization in a way that a human can understand",
-                    "reasoning": "reasoning behind the suggestion",
-                    "viz_datasources": [
-                        "List of SQL queries that will be used as data sources for the visualization.",
-                        "The number of viz_datasource MUST be equal to the viz_type datasourceCount.",
-                        "The queries must be consistent with the data provided in the schema.",
-                        "For example, if the schema contains a table named 'bart_lines', the query should be 'SELECT `column` FROM `schemaname`."bart_lines".",
-                        "The queries should select only the columns that are relevant to the visualization and columns that are selected.",
-                        "For example, if the visualization is a bar chart that shows the number of passengers per line, the query should be 'SELECT `line_name`, `passengers` FROM `schemaname`."bart_lines";",
-                        "The queries should filter out nulls for the columns selected.",
-                        "Use enclosures compatible with the database backend being used. i.e `column_name` for MySQL, \"column_name\" for PostgreSQL.",
-                        "The queries should ensure that castings are done only when necessary and filters added to support valid casting.",
-                        "The queries should not include any grouping as the grouping will be done by the visualization based on the llm_optimized description.",
-                        "The queries should not include any ordering as the ordering will be done by the visualization based on the llm_optimized description.",
-                        "The queries should not include any limit as the limit will be done by the visualization based on the llm_optimized description.",
-                        "The queries should try to standardize the data.",
-                        "For example, if the data is in different units, the queries should convert the data to a single unit.",
-                        "If the data is a mix of upper and lower case, the queries should convert the data to a single case.",
-                        "The query MUST be a valid SQL query. For the database backend ",
-                        "Join queries are allowed accross schemas in the same database.",
-                        "The queries should try and make vizualizations labels are human readable. E.G for queries returning ids, the queries should join with tables that have human readable names. ONLY if the human readable names are available AND selected in the schema.",
-                        "Make no assumptions about the data in the database.",
-                    ],
-                    "llm_optimized": "detailed description of the vizualization, explain how viz_datasources should be used to create the visualization, explain how the data from viz_datasources can be modified using sql expressions to create the visualization. do not reference columns that are not provided by the viz_datasources",
-                    "databaseId": "The id of the datasource that the visualization will be created from. This id should be consistent with the databaseId in the schema.",
-                    "schemaName": "The name of the schema that the visualization will be created from. This name should be consistent with the schemaName in the schema."
-                    "backend": "Database backend for based on the databaseId",
-                    }}
-                ]
-                
-                The response should be in a valid JSON format.
-                """,
-                ],
-            }
-            ]
-        )
-        response = chat_session.send_message("Please provide suggestions for visualizations that can be created from the data.")
-        self.logger.info(f"Response: {response.text}")
-        return self.json_response(response.text)
+        response = {}
+        return self.json_response(response)
 
 
 
@@ -331,6 +220,12 @@ class AssistantView(BaseSupersetView):
         formData = body["formData"]
         viz_type = formData["viz_type"]
         self.logger.info(f"Getting control values for {viz_type}")
+        self.logger.info(f"Controls: {controls}")
+        self.logger.info(f"Form data: {formData}")
+        self.logger.info(f"Instruction: {instruction}")
+
+        # call you function
+
         new_form_controls = {}
 
         return self.json_response(new_form_controls)
@@ -353,72 +248,38 @@ class AssistantView(BaseSupersetView):
     #     os.remove(temp_path)
     #     return file
 
-    # @expose("/gemini/get-viz-explanation", methods=["POST"])
-    # def get_viz_explanation(self) -> FlaskResponse:
-    #     """ Request schema
-    #     {
-    #         datasource: {}, this is the datasource used to create the viz
-    #         form_data: {}, this are the values used to create the viz from the controls
-    #         controls: {}, this are the controls used to create the viz. controls values form the form_data which in turn is used to create the viz.
-    #         image: [], base64 encoded image with prefix "data:image/jpeg;base64,"
-    #         image_type: jpeg
-    #     }
-    #     """
-    #     body = request.json
-    #     self.logger.info(f"get_viz_explanation Request: {body}")
-    #     image = body["image"]
-    #     file = self.upload_to_genai(image)
-    #     datasource = body["datasource"]
-    #     form_data = body["form_data"]
-    #     controls = body["controls"]
-
-    #     chat_session = self.model.start_chat(
-    #         history=[
-    #             {
-    #                 "role": "user",
-    #                 "parts": [
-    #                     file,
-    #                     f"""The following chart was created from the datasource {datasource}
-    #                     The chart controls {controls} are used to controls what is displayed in the chart.
-    #                     The values obtained fromthe controls form the form_data {form_data}.
-    #                     Using all the above information, explain what the chart is trying to convey.
-    #                     The response should be a json object with the following structure:
-    #                     Do not make assumptions about the data.
-    #                     Do not make assumptions about the chart.
-    #                     Do not make assumptions about the chart controls.
-    #                     Do not make assumptions about the form_data.
-    #                     Do not make assumptions about the datasource.
-    #                     Take into account that the chart controls and form_data are used to control what is displayed in the chart.
-    #                     Take into account any displayed text in the chart.
-    #                     Use valid json value types. ie boolean values should be true or false. not True or False. i.e lowercase.
-    #                     {{
-    #                         "viz_type": "viz_type",
-    #                         "viz_title": "viz_title",
-    #                         "analysis": "An analysis of the chart, using the chart controls and form_data to explain what the chart is trying to convey. use simple language and avoid technical jargon.",
-    #                         "take_away": "A summary of the chart, using the chart controls and form_data to explain what the chart is trying to convey. use simple language and avoid technical jargon.",
-    #                         "recommendations": "A recommendation based on the chart, using the chart controls and form_data to explain what can be done to improve the chart. use simple language and avoid technical jargon.",
-    #                         "insights": "A summary of the chart, using the chart controls and form_data to explain what the chart is trying to convey. use simple language and avoid technical jargon.",
-    #                         "form_data_used": [
-    #                             From the controls and chart determine the values in form_data that were used to create the chart. and other possible values that could have been used to create the chart.
-    #                             the output is an array of object with the following structure:
-    #                             {{
-    #                              control_name: "control_name",
-    #                              control_value: "control_value",
-    #                              other_possible_values: ["other_possible_values"],
-    #                              description: "description of the control_value",
-    #                              recommended_values: ["recommended control_values to  use in order to implement the recommendations"],
-
-    #                             }}
-    #                             ],
-    #                     }}
-
-    #                     """,
-    #                 ]
-    #             }
-    #         ]
-    #     )
-
-    #     response = chat_session.send_message(f"What information does the chart convey?")
-
-    #     return self.json_response(response.text)
+    @expose("/gemini/get-viz-explanation", methods=["POST"])
+    def get_viz_explanation(self) -> FlaskResponse:
+        """ Request schema
+        {
+            datasource: {}, this is the datasource used to create the viz
+            form_data: {}, this are the values used to create the viz from the controls
+            controls: {}, this are the controls used to create the viz. controls values form the form_data which in turn is used to create the viz.
+            image: [], base64 encoded image with prefix "data:image/jpeg;base64,"
+            image_type: jpeg
+        }
+        """
+        body = request.json
+        self.logger.info(f"get_viz_explanation Request: {body}")
+        image = body["image"]
+        # file = self.upload_to_genai(image)
+        datasource = body["datasource"]
+        form_data = body["form_data"]
+        controls = body["controls"]
+        response = {}
+        return self.json_response(response)
         
+    @expose("/questionnaire", methods=["POST"])
+    def questionnaire(self) -> FlaskResponse:
+        """
+        conversation: [
+            {
+                question: string
+                answer: string
+            }
+        ]
+        """
+        body = request.json
+        conversation = body["conversation"]
+        response = self.context_questionnaire.nextQuestion(conversation)
+        return self.json_response(response)

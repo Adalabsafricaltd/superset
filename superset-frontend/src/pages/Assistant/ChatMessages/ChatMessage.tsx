@@ -12,12 +12,13 @@ export interface UserPromptProps {
 export interface PromptResponseProps {
   message: string,
   sql_query: string,
+  viz_type: any[],
   can_be_visualized: string
 }
 
 export interface ChatMessageProps {
   id: string,
-  prompt: UserPromptProps;
+  prompt?: UserPromptProps;
   response?: PromptResponseProps;
 }
 
@@ -124,7 +125,7 @@ export class ChatMessage extends React.Component<ChatMessageProps> {
          
         }}
       >
-        <UserPrompt {...prompt} />
+        { prompt && <UserPrompt {...prompt} /> }
         {response && <PromptResponse {...response} />}
       </div>
     );
