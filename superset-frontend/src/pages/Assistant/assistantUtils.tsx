@@ -5,33 +5,31 @@ import { DatasourceTableProps } from "./ContextBuilder/DatasourceTable";
 import { DatasourceSchemaProps } from "./ContextBuilder/DatasourceSchema";
 import { ChatMessageProps } from "./ChatMessages/ChatMessage";
 
-interface Descriptions {
-  human_understandable: string,
-  llm_optimized: string,
+export type Descriptions = {
+  description?: string,
+  columns?:{
+    columnName: string,
+    description: string
+  }[]
 }
 
 
-export const getTableDescription = async (data: any, target: string) => {
-  const endpoint = "assistant/gemini/table"
+export const getTableDescription = async (databseId: any, schema: string, table: string) => {
+  const endpoint = "assistant/table"
   const request = {
-    data: JSON.stringify(data),
-    table_name: target
+    databseId: databseId,
+    schema: schema,
+    table_name: table
   }
   console.log("getTableDescription : Request", request);
   try {
     const {json} = await SupersetClient.post({ endpoint: endpoint, body: JSON.stringify(request), headers: { 'Content-Type': 'application/json' } });
-    // console.log("Response", response.json);
-    const responseJson = json
-    // console.log("Response 2", responseJson);
-    const descriptions: Descriptions = {
-      human_understandable: responseJson["human_understandable"],
-      llm_optimized: responseJson["llm_optimized"]
-    }
-    console.log("Response 3 ", descriptions);
+    console.log("getTableDescription", json)
+    const descriptions: Descriptions = {...json}
     return descriptions;
   } catch (error) {
     console.error("getTableDescription: Error fetching table description:", error);
-    return { human_understandable: "", llm_optimized: "" };
+    return {}
   }
 };
 

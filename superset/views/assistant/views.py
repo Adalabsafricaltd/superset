@@ -140,32 +140,35 @@ class AssistantView(BaseSupersetView):
         # self.logger.info(f"Database ID: {databaseId}")
         # self.logger.info(f"Context: {allowed_scope}")
         # self.logger.info(f"Prompt: {prompt}")
-        azureLang = SQLLangchain(databaseId)
-        if not azureLang.isValid():
+        sqlLang = SQLLangchain(databaseId)
+        if not sqlLang.isValid():
             raise Exception(f"Database ID {databaseId} is invalid")
-        response = azureLang.prompt(allowed_scope,history,prompt)
+        response = sqlLang.prompt(allowed_scope,history,prompt)
         # self.logger.info(f"Response: {response}")
         return self.json_response(response)
     
     
     #  Api to interact with gemini and get table descriptions
-    @expose("/gemini/table", methods=["POST"])
+    @expose("/table", methods=["POST"])
     @safe
     def gemini(self) -> FlaskResponse:
         
         """ Request schema 
         {
-            data: string,
+            databaseId: number,
+            schema: string,
             table_name: string
         }
-
-        'data' is a string containing the json schema of the database see ./samples/gemini_table_data.json
-
         """
         body = request.json
-        data = body["data"]
-        target = body["table_name"]
-        response = {}
+        databaseId = body["databaseId"]
+        schema = body["schema"]
+        table_name = body["table_name"]
+        target = f"{schema}.{table_name}"
+        sqlLang = SQLLangchain(databaseId)
+        if not sqlLang.isValid():
+            raise Exception(f"Database ID {databaseId} is invalid")
+        response = sqlLang.explain_describe(target)
         return self.json_response(response)
     
     # Api to interact with gemini and get visualization suggestions

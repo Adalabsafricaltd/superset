@@ -75,7 +75,7 @@ class SQLLangchain:
         return None
 
 
-    def explain_describe(self, allowed_scope, target):
+    def explain_describe(self, target):
         """
         allowed_scope -> [ {
             schemaName: str,
@@ -99,7 +99,38 @@ class SQLLangchain:
             ... any additional data 
         }
         """
-        return None
+        
+        test_response = {
+                    "description": f"This table {target}",
+                    "columns": [
+                        {
+                            "columnName": "product_id",
+                            "description": "Unique identifier for each product"
+                        },
+                        {
+                            "columnName": "product_name",
+                            "description": "Name of the product"
+                        },
+                        {
+                            "columnName": "category",
+                            "description": "Category of the product"
+                        },
+                        {
+                            "columnName": "sales_amount",
+                            "description": "Total sales amount for the product"
+                        },
+                        {
+                            "columnName": "sale_date",
+                            "description": "Date of the sale"
+                        }
+                    ],
+                    "additional_data": {
+                        "total_products": 1000,
+                        "last_updated": "2023-06-15"
+                    }
+                }
+        
+        return test_response
 
     # Chat
     
@@ -120,6 +151,9 @@ class SQLLangchain:
         """
 
         test_responses = [
+             {
+                "ai_response": "Here's a breakdown of sales by product category:"
+            },
             {
                 "ai_response": "Here's a breakdown of sales by product category:",
                 "sql_query": "SELECT category, SUM(sales) FROM products GROUP BY category"
@@ -147,7 +181,7 @@ class SQLLangchain:
                 ]
             },
             {
-                "ai_response": "Let's compare product performance:",
+                "ai_response": "Let's compare product performance:"
             }
         ]
         

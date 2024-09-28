@@ -22,8 +22,6 @@ import Settings from './Settings';
 
 function Assistant(props: AssistantProps) {
 
-  console.log("Assistant Props", props);
-
   // data selection state
   const [isContextBuilderOpen, setContextBuilderOpen] = useState(false);
   const [isSettingsOpen, setSettingsOpen] = useState(false);
@@ -139,7 +137,7 @@ function Assistant(props: AssistantProps) {
 }
 
 function mapStateToProps(state: any) {
-  console.log("Assistant State", state);
+  
   const { assistant } = state;
   return {
     ...assistant

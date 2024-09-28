@@ -25,7 +25,6 @@ export class AssistantPrompt extends React.Component<AssistantProps, AssistantPr
 
     constructor(props: AssistantProps) {
         super(props)
-        console.log("AssistantPrompt Props", props)
         this.state = {
             ...props,
             prompt: '',
@@ -35,11 +34,10 @@ export class AssistantPrompt extends React.Component<AssistantProps, AssistantPr
     }
 
     componentDidMount() {
-        console.log("AssistantPrompt componentDidMount", this.props)
+
     }
 
     componentDidUpdate(prevProps: Readonly<AssistantProps>, prevState: Readonly<AssistantPromptState>, snapshot?: any): void {
-        console.log("AssistantPrompt componentDidUpdate", prevProps, this.props)
         if (prevProps.context !== this.props.context) {
             this.setState({
                 context: this.props.context
@@ -58,7 +56,6 @@ export class AssistantPrompt extends React.Component<AssistantProps, AssistantPr
         
         const promptId = uuid()
         const {prompt , context, conversation} = this.state
-        console.log("handlePrompt => ", promptId, prompt, context)
         if( prompt.length > 0 && context){
             this.props.actions.newPrompt(promptId, { prompt })
             const { ai_response, sql_query, viz_type  } = await assistantPrompt(context,conversation, prompt)
@@ -81,7 +78,6 @@ export class AssistantPrompt extends React.Component<AssistantProps, AssistantPr
     render() {
 
         const { isLoading, prompt, context } = this.state
-        console.log("Prompt state:", this.state.context)
         
 
         return (

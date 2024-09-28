@@ -37,7 +37,6 @@ export class AssistantHome extends Component<AssistantProps, AssistantState> {
   // constructor
   constructor(props: AssistantProps) {
     super(props);
-    console.log("Assistant Home Props", props);
     this.state = {
       ...this.props,
       isLoadingSuggestions: false,
@@ -49,7 +48,6 @@ export class AssistantHome extends Component<AssistantProps, AssistantState> {
   }
 
   async componentDidUpdate(prevProps: AssistantProps) {
-    console.log("Assistant Home Props: componentDidUpdate", cleanDatasourceProps((this.props.data)));
     if (prevProps.data !== this.props.data) {
       this.setState({
         currentContext: cleanDatasourceProps(this.props.data)
@@ -73,8 +71,7 @@ export class AssistantHome extends Component<AssistantProps, AssistantState> {
   }
 
   componentDidMount() {
-    console.log("Assistant Home Props: componentDidMount", cleanDatasourceProps((this.props.data)));
-    this.chatScrollToEnd()
+   this.chatScrollToEnd()
   }
 
   render() {

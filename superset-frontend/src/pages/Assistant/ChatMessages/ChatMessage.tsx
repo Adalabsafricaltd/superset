@@ -1,7 +1,8 @@
 import React from 'react'
 import MarkDownPreview from '@uiw/react-markdown-preview'
-import { UserOutlined } from '@ant-design/icons'
-import  { t } from '@superset-ui/core'
+import { TableOutlined, UserOutlined } from '@ant-design/icons'
+import { Tooltip } from 'antd'
+import { t } from '@superset-ui/core'
 import { InfoCircleOutlined } from '@ant-design/icons'
 
 
@@ -47,9 +48,9 @@ function UserPrompt(props: UserPromptProps) {
         }}>
           <UserOutlined />
         </div>
-        <strong><p style={{ alignSelf: 'center', padding: '8px', fontSize: '16px' }} > { t('You') } </p></strong>
+        <strong><p style={{ alignSelf: 'center', padding: '8px', fontSize: '16px' }} > {t('You')} </p></strong>
       </div>
-      <div style={{ marginLeft: '46px', marginBottom: '16px'}}>
+      <div style={{ marginLeft: '46px', marginBottom: '16px' }}>
         <MarkDownPreview style={{
           all: 'unset',
           background: '#fff',
@@ -62,6 +63,10 @@ function UserPrompt(props: UserPromptProps) {
       </div>
     </div>
   )
+}
+
+function navigateToSqlLab(datasourceId: string, sql: string) {
+
 }
 
 function PromptResponse(props: PromptResponseProps) {
@@ -88,10 +93,10 @@ function PromptResponse(props: PromptResponseProps) {
         }}>
           <UserOutlined />
         </div>
-        <strong><p style={{ alignSelf: 'center', height: '100%', padding: '10px', fontSize: '16px' }} > { t('Assistant') } </p></strong>
+        <strong><p style={{ alignSelf: 'center', height: '100%', padding: '10px', fontSize: '16px' }} > {t('Assistant')} </p></strong>
       </div>
-      <div style={{ marginLeft: '46px', marginTop: '-8px'}}>
-        <div style={{ position: 'relative'}}>
+      <div style={{ marginLeft: '46px', marginTop: '-8px' }}>
+        <div style={{ position: 'relative' }}>
           <MarkDownPreview style={{
             all: 'unset',
             background: '#fff',
@@ -102,13 +107,25 @@ function PromptResponse(props: PromptResponseProps) {
             }}
             source={complete_message} />
           <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-            <InfoCircleOutlined />
+            <div style={{
+              display: 'flex',
+              gap: '15px',
+              flexDirection: 'row'
+            }}>
+              <InfoCircleOutlined />
+              {sql_query &&
+                <Tooltip title='View query in SQL Lab'>
+                  <TableOutlined onClick={(e) => navigateToSqlLab(sql_query, '')} />
+                </Tooltip>
+              }
+            </div>
           </div>
         </div>
       </div>
     </div>
   )
 }
+
 export class ChatMessage extends React.Component<ChatMessageProps> {
 
 
@@ -116,16 +133,13 @@ export class ChatMessage extends React.Component<ChatMessageProps> {
 
   render() {
     const { prompt, response } = this.props;
-
-
-
     return (
       <div
         style={{
-         
+
         }}
       >
-        { prompt && <UserPrompt {...prompt} /> }
+        {prompt && <UserPrompt {...prompt} />}
         {response && <PromptResponse {...response} />}
       </div>
     );

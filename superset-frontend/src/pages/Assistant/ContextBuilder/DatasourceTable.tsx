@@ -183,13 +183,22 @@ export class DatasourceTable extends Component<DatasourceTableProps, DatasourceT
             isDescriptionLoading: true
         });
         await this.loadTableData();
-        const descriptions = await getTableDescription(this.state, this.state.tableName);
+        const { databaseId, schemaName, tableName } = this.state
+        const { description, columns } = await getTableDescription(databaseId, schemaName, tableName);
         this.setState({
-            description: descriptions.human_understandable,
-            descriptionExtra: descriptions.llm_optimized,
+            description: description ? description : 'None provided',
+            columns: this.state.columns.map((c) => {
+                c.columnDescription = 'None provided'
+                for (const c2 of columns || []) {
+                    const { columnName, description } = c2;
+                    if (columnName === c.columnName) {
+                        c.columnDescription = description;
+                    }
+                }
+                return c;
+            }),
             isDescriptionLoading: false
         }, () => { this.props.actions.updateDatabaseSchemaTable(this.state) });
-
     };
 
     handleDescriptionInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
