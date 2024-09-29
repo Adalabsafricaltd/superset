@@ -1,5 +1,3 @@
-import QueryStateLabel from '../../../SqlLab/components/QueryStateLabel';
-
 const query = `
 {
     "changed_on": "2024-08-26T11:31:45.853974",
@@ -995,27 +993,21 @@ const query = `
         ]
     }
 }
-`
+`;
 
 /**
  * Props
  */
 export interface QueryResultTableProps {
-    query: {};
+  query: {};
 }
 
 const testProps = {
-    query: JSON.parse(query)
-}
+  query: JSON.parse(query),
+};
 
 export function QueryResultTable() {
-    const props: QueryResultTableProps = testProps;
-    console.log("Query Result Table Props", props);
-    return (
-        <>
-        
-        
-        </>
-    );
-
+  const props: QueryResultTableProps = testProps;
+  console.log('Query Result Table Props', props);
+  return <></>;
 }

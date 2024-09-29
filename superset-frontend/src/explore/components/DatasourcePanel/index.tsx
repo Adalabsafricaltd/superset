@@ -136,7 +136,6 @@ export default function DataSourcePanel({
   actions,
   width,
 }: Props) {
-
   const [dropzones] = useContext(DropzoneContext);
   const { columns: _columns, metrics } = datasource;
 

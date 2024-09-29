@@ -1,28 +1,26 @@
-import React from 'react'
-import MarkDownPreview from '@uiw/react-markdown-preview'
-import { TableOutlined, UserOutlined } from '@ant-design/icons'
-import { Tooltip } from 'antd'
-import { t } from '@superset-ui/core'
-import { InfoCircleOutlined } from '@ant-design/icons'
-
+import React from 'react';
+import MarkDownPreview from '@uiw/react-markdown-preview';
+import { TableOutlined, UserOutlined } from '@ant-design/icons';
+import { Tooltip } from 'antd';
+import { t } from '@superset-ui/core';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 export interface UserPromptProps {
-  prompt: string
+  prompt: string;
 }
 
 export interface PromptResponseProps {
-  message: string,
-  sql_query: string,
-  viz_type: any[],
-  can_be_visualized: string
+  message: string;
+  sql_query: string;
+  viz_type: any[];
+  can_be_visualized: string;
 }
 
 export interface ChatMessageProps {
-  id: string,
+  id: string;
   prompt?: UserPromptProps;
   response?: PromptResponseProps;
 }
-
 
 function UserPrompt(props: UserPromptProps) {
   let { prompt } = props;
@@ -34,44 +32,54 @@ function UserPrompt(props: UserPromptProps) {
           flexDirection: 'row',
           alignContent: 'center',
           justifyContent: 'left',
-          marginTop: '24px'
+          marginTop: '24px',
         }}
       >
-        <div style={{
-          height: '36px',
-          width: '36px',
-          borderRadius: '18px',
-          background: '#ddd',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
+        <div
+          style={{
+            height: '36px',
+            width: '36px',
+            borderRadius: '18px',
+            background: '#ddd',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <UserOutlined />
         </div>
-        <strong><p style={{ alignSelf: 'center', padding: '8px', fontSize: '16px' }} > {t('You')} </p></strong>
+        <strong>
+          <p style={{ alignSelf: 'center', padding: '8px', fontSize: '16px' }}>
+            {' '}
+            {t('You')}{' '}
+          </p>
+        </strong>
       </div>
       <div style={{ marginLeft: '46px', marginBottom: '16px' }}>
-        <MarkDownPreview style={{
-          all: 'unset',
-          background: '#fff',
-          color: '#333'
-        }}
-          wrapperElement={{
-            "data-color-mode": "light"
+        <MarkDownPreview
+          style={{
+            all: 'unset',
+            background: '#fff',
+            color: '#333',
           }}
-          source={prompt} />
+          wrapperElement={{
+            'data-color-mode': 'light',
+          }}
+          source={prompt}
+        />
       </div>
     </div>
-  )
+  );
 }
 
-function navigateToSqlLab(datasourceId: string, sql: string) {
-
-}
+function navigateToSqlLab(datasourceId: string, sql: string) {}
 
 function PromptResponse(props: PromptResponseProps) {
-  let { message, sql_query, can_be_visualized } = props;
-  let complete_message = (sql_query && sql_query.length > 0) ? message + `\n\`\`\` sql\n${sql_query}\n\`\`\`` : message;
+  let { message, sql_query } = props;
+  let complete_message =
+    sql_query && sql_query.length > 0
+      ? message + `\n\`\`\` sql\n${sql_query}\n\`\`\``
+      : message;
   return (
     <div>
       <div
@@ -79,66 +87,78 @@ function PromptResponse(props: PromptResponseProps) {
           display: 'flex',
           flexDirection: 'row',
           alignContent: 'center',
-          justifyContent: 'left'
+          justifyContent: 'left',
         }}
       >
-        <div style={{
-          height: '36px',
-          width: '36px',
-          borderRadius: '18px',
-          background: '#ddd',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
+        <div
+          style={{
+            height: '36px',
+            width: '36px',
+            borderRadius: '18px',
+            background: '#ddd',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <UserOutlined />
         </div>
-        <strong><p style={{ alignSelf: 'center', height: '100%', padding: '10px', fontSize: '16px' }} > {t('Assistant')} </p></strong>
+        <strong>
+          <p
+            style={{
+              alignSelf: 'center',
+              height: '100%',
+              padding: '10px',
+              fontSize: '16px',
+            }}
+          >
+            {' '}
+            {t('Assistant')}{' '}
+          </p>
+        </strong>
       </div>
       <div style={{ marginLeft: '46px', marginTop: '-8px' }}>
         <div style={{ position: 'relative' }}>
-          <MarkDownPreview style={{
-            all: 'unset',
-            background: '#fff',
-            color: '#333',
-          }}
-            wrapperElement={{
-              "data-color-mode": "light"
+          <MarkDownPreview
+            style={{
+              all: 'unset',
+              background: '#fff',
+              color: '#333',
             }}
-            source={complete_message} />
+            wrapperElement={{
+              'data-color-mode': 'light',
+            }}
+            source={complete_message}
+          />
           <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-            <div style={{
-              display: 'flex',
-              gap: '15px',
-              flexDirection: 'row'
-            }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '15px',
+                flexDirection: 'row',
+              }}
+            >
               <InfoCircleOutlined />
-              {sql_query &&
-                <Tooltip title='View query in SQL Lab'>
-                  <TableOutlined onClick={(e) => navigateToSqlLab(sql_query, '')} />
+              {sql_query && (
+                <Tooltip title="View query in SQL Lab">
+                  <TableOutlined
+                    onClick={e => navigateToSqlLab(sql_query, '')}
+                  />
                 </Tooltip>
-              }
+              )}
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export class ChatMessage extends React.Component<ChatMessageProps> {
-
-
-
-
   render() {
     const { prompt, response } = this.props;
     return (
-      <div
-        style={{
-
-        }}
-      >
+      <div style={{}}>
         {prompt && <UserPrompt {...prompt} />}
         {response && <PromptResponse {...response} />}
       </div>

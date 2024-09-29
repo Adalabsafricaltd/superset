@@ -11,28 +11,24 @@ import { Button } from 'antd';
 import { BuildFilled, CloseOutlined, SettingFilled } from '@ant-design/icons';
 import Settings from './Settings';
 
-
 /**
  * title: string;
     suggestion: string;
     backgroundColor?: string;
  */
 
-
-
 function Assistant(props: AssistantProps) {
-
   // data selection state
   const [isContextBuilderOpen, setContextBuilderOpen] = useState(false);
   const [isSettingsOpen, setSettingsOpen] = useState(false);
 
   const handleContextBuilderOpen = () => {
     setContextBuilderOpen(true);
-  }
+  };
 
   const handleContextBuilderClose = () => {
     setContextBuilderOpen(false);
-  }
+  };
 
   const assistantContextBuilderModal = () => {
     return (
@@ -47,8 +43,8 @@ function Assistant(props: AssistantProps) {
             padding: 0,
           },
           mask: {
-            backgroundColor: 'rgba(0, 0, 0, 0.5)'
-          }
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          },
         }}
         closable={false}
         footer={null}
@@ -77,15 +73,12 @@ function Assistant(props: AssistantProps) {
           <AssistantContextBuilder
             datasources={props.data || []}
             actions={props.actions}
-            onChange={(data) => {
-
-            }} />
-
+            onChange={data => {}}
+          />
         </div>
-
       </Modal>
-    )
-  }
+    );
+  };
 
   // This Component Serves as the Assistant's Home Page
   // Header Dispays the Users Name and Databases they have access to
@@ -97,7 +90,7 @@ function Assistant(props: AssistantProps) {
           height: '100%',
           flex: '1',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
         }}
       >
         <SubMenu
@@ -106,51 +99,58 @@ function Assistant(props: AssistantProps) {
             {
               name: (
                 <>
-                  <BuildFilled height={'24px'} width={'24px'} /> {t('Context Builder')}
+                  <BuildFilled height={'24px'} width={'24px'} />{' '}
+                  {t('Context Builder')}
                 </>
               ),
-              onClick: () => { handleContextBuilderOpen() },
-              buttonStyle: 'secondary'
+              onClick: () => {
+                handleContextBuilderOpen();
+              },
+              buttonStyle: 'secondary',
             },
             {
               name: (
                 <>
-                  <SettingFilled height={'24px'} width={'24px'} /> {t('Settings')}
+                  <SettingFilled height={'24px'} width={'24px'} />{' '}
+                  {t('Settings')}
                 </>
               ),
-              onClick: () => { setSettingsOpen(true) },
-              buttonStyle: 'primary'
-            }
+              onClick: () => {
+                setSettingsOpen(true);
+              },
+              buttonStyle: 'primary',
+            },
           ]}
         />
-        <AssistantHome {...{
-          ...props,
-        }} />
+        <AssistantHome
+          {...{
+            ...props,
+          }}
+        />
       </div>
 
       {assistantContextBuilderModal()}
-      <Settings isOpen={isSettingsOpen} onClose={() => {
-        setSettingsOpen(false)
-      }} />
+      <Settings
+        isOpen={isSettingsOpen}
+        onClose={() => {
+          setSettingsOpen(false);
+        }}
+      />
     </>
   );
 }
 
 function mapStateToProps(state: any) {
-  
   const { assistant } = state;
   return {
-    ...assistant
+    ...assistant,
   };
 }
 
 function mapDispatchToProps(dispatch: any) {
-
   return {
-    actions: bindActionCreators(actions, dispatch)
+    actions: bindActionCreators(actions, dispatch),
   };
 }
 
-export default connect(
-  mapStateToProps, mapDispatchToProps
-)(Assistant)
+export default connect(mapStateToProps, mapDispatchToProps)(Assistant);

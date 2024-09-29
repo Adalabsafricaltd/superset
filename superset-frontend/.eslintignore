@@ -26,6 +26,7 @@ vendor/*
 docs/*
 src/dashboard/deprecated/*
 src/temp/*
+src/pages/Assistant/*
 **/node_modules
 *.d.ts
 coverage/
@@ -33,3 +34,4 @@ esm/
 lib/
 tmp/
 storybook-static/
+
