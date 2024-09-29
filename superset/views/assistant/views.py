@@ -151,7 +151,7 @@ class AssistantView(BaseSupersetView):
     #  Api to interact with gemini and get table descriptions
     @expose("/table", methods=["POST"])
     @safe
-    def gemini(self) -> FlaskResponse:
+    def table_description(self) -> FlaskResponse:
         
         """ Request schema 
         {
@@ -252,7 +252,7 @@ class AssistantView(BaseSupersetView):
     #     os.remove(temp_path)
     #     return file
 
-    @expose("/gemini/get-viz-explanation", methods=["POST"])
+    @expose("/get-viz-explanation", methods=["POST"])
     def get_viz_explanation(self) -> FlaskResponse:
         """ Request schema
         {
@@ -264,13 +264,15 @@ class AssistantView(BaseSupersetView):
         }
         """
         body = request.json
-        self.logger.info(f"get_viz_explanation Request: {body}")
         image = body["image"]
         # file = self.upload_to_genai(image)
         datasource = body["datasource"]
         form_data = body["form_data"]
-        controls = body["controls"]
-        response = {}
+        databaseId = body["databaseId"]
+        sqlLang = SQLLangchain(databaseId)
+        if not sqlLang.isValid():
+            raise Exception(f"Database ID {databaseId} is invalid")
+        response = sqlLang.explain_image(image, f"The chart is created usign the variables {form_data} from the data obtained from {datasource}")
         return self.json_response(response)
         
     @expose("/questionnaire", methods=["POST"])

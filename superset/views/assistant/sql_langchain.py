@@ -132,7 +132,9 @@ class SQLLangchain:
         
         return test_response
 
-    # Chat
+    def explain_image(self, image, additional_data):
+
+        return None
     
     def prompt(self, allowed_scope, history, user_prompt):
         """Return schema
