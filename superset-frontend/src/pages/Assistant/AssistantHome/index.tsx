@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
-import { AssistantCategoriesProps, AssistantSuggestionCategories } from './AssistantSuggestionCategories';
+import {
+  AssistantCategoriesProps,
+  AssistantSuggestionCategories,
+} from './AssistantSuggestionCategories';
 import { AssistantWelcomeMessage } from './AssistantWelcomeMessage';
 import { AssistantPrompt } from './AssistantPrompt';
 import { DatasourceProps } from '../ContextBuilder/Datasource';
-import { getVizSuggestions, cleanDatasourceProps } from '../assistantUtils';
-import { AssistantSuggestionProps } from './AssistantSuggestion';
+import { cleanDatasourceProps } from '../assistantUtils';
 import { AssistantActionsType } from '../actions';
 import Loading from 'src/components/Loading';
 import { ChatMessages } from '../ChatMessages';
@@ -31,34 +33,34 @@ export interface AssistantState extends AssistantProps {
  * This is the main page for the Assistant: Superset. This page will be the first page that the user sees when they open the Assistant.
  */
 export class AssistantHome extends Component<AssistantProps, AssistantState> {
-
   timer: any;
 
   // constructor
   constructor(props: AssistantProps) {
     super(props);
-    console.log("Assistant Home Props", props);
     this.state = {
       ...this.props,
       isLoadingSuggestions: false,
       categories: {
-        categories: []
+        categories: [],
       },
-      currentContext: cleanDatasourceProps((this.props.data))
+      currentContext: cleanDatasourceProps(this.props.data),
     };
   }
 
   async componentDidUpdate(prevProps: AssistantProps) {
-    console.log("Assistant Home Props: componentDidUpdate", cleanDatasourceProps((this.props.data)));
     if (prevProps.data !== this.props.data) {
       this.setState({
-        currentContext: cleanDatasourceProps(this.props.data)
+        currentContext: cleanDatasourceProps(this.props.data),
       });
     }
     if (prevProps.conversation !== this.props.conversation) {
-      this.setState({
-        conversation: this.props.conversation
-      }, this.chatScrollToEnd);
+      this.setState(
+        {
+          conversation: this.props.conversation,
+        },
+        this.chatScrollToEnd,
+      );
     }
   }
 
@@ -67,14 +69,13 @@ export class AssistantHome extends Component<AssistantProps, AssistantState> {
     if (chatContainerDiv) {
       chatContainerDiv.scrollBy({
         behavior: 'smooth',
-        top: chatContainerDiv.scrollHeight
+        top: chatContainerDiv.scrollHeight,
       });
     }
   }
 
   componentDidMount() {
-    console.log("Assistant Home Props: componentDidMount", cleanDatasourceProps((this.props.data)));
-    this.chatScrollToEnd()
+    this.chatScrollToEnd();
   }
 
   render() {
@@ -83,17 +84,20 @@ export class AssistantHome extends Component<AssistantProps, AssistantState> {
 
     return (
       <>
-        <div id='assistant-container' style={{
-          flexGrow: 1,
-          flexShrink: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          flexFlow: 'column',
-          width: '960px',
-          maxWidth: '100%',
-          margin: '0 auto',
-          maxHeight: 'calc(100vh - 130px)',
-        }}>
+        <div
+          id="assistant-container"
+          style={{
+            flexGrow: 1,
+            flexShrink: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            flexFlow: 'column',
+            width: '960px',
+            maxWidth: '100%',
+            margin: '0 auto',
+            maxHeight: 'calc(100vh - 130px)',
+          }}
+        >
           <style>
             {`
                 @media (max-width: 960px) {
@@ -103,15 +107,21 @@ export class AssistantHome extends Component<AssistantProps, AssistantState> {
                 }
               `}
           </style>
-          <div style={{
-            flex: '0 0 auto',
-            width: '100%',
-          }} >
-            {(!conversation || conversation.length === 0) && <AssistantWelcomeMessage userFirsrName={user.firstName} />}
-            {(!conversation || conversation.length === 0) && <AssistantSuggestionCategories {...categories} />}
+          <div
+            style={{
+              flex: '0 0 auto',
+              width: '100%',
+            }}
+          >
+            {(!conversation || conversation.length === 0) && (
+              <AssistantWelcomeMessage userFirsrName={user.firstName} />
+            )}
+            {(!conversation || conversation.length === 0) && (
+              <AssistantSuggestionCategories {...categories} />
+            )}
           </div>
           <div
-            id='chat-container-div'
+            id="chat-container-div"
             style={{
               flexShrink: 1,
               flexGrow: 1,
@@ -119,16 +129,23 @@ export class AssistantHome extends Component<AssistantProps, AssistantState> {
               minHeight: 0,
               display: 'flex',
               flexDirection: 'column',
-            }}>
+            }}
+          >
             {conversation && <ChatMessages messages={conversation} />}
           </div>
-          <div style={{
-            flex: '0 0 auto',
-            display: 'flex',
-            alignSelf: 'flex-end',
-            width: '100%',
-          }}>
-            <AssistantPrompt context={this.state.currentContext} actions={this.props.actions} />
+          <div
+            style={{
+              flex: '0 0 auto',
+              display: 'flex',
+              alignSelf: 'flex-end',
+              width: '100%',
+            }}
+          >
+            <AssistantPrompt
+              context={this.state.currentContext}
+              actions={this.props.actions}
+              conversation={conversation}
+            />
           </div>
         </div>
         {isLoadingSuggestions && <Loading />}

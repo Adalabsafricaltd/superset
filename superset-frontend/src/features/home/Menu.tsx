@@ -192,9 +192,6 @@ export function Menu({
   },
   isFrontendRoute = () => false,
 }: MenuProps) {
-
-  
-
   const [showMenu, setMenu] = useState<MenuMode>('horizontal');
   const screens = useBreakpoint();
   const uiConfig = useUiConfig();
@@ -304,7 +301,6 @@ export function Menu({
   };
   return (
     <StyledHeader className="top" id="main-menu" role="navigation">
-     
       <Global styles={globalStyles(theme)} />
       <Row>
         <Col md={16} xs={24}>
@@ -339,8 +335,7 @@ export function Menu({
             className="main-nav"
             selectedKeys={activeTabs}
           >
-            {menu.map((item, index) => 
-            {
+            {menu.map((item, index) => {
               const props = {
                 index,
                 ...item,
@@ -358,9 +353,7 @@ export function Menu({
               };
 
               return renderSubMenu(props);
-            }
-            
-            )}
+            })}
           </DropdownMenu>
         </Col>
         <Col md={8} xs={24}>

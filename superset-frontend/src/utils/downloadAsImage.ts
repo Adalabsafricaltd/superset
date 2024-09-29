@@ -46,7 +46,6 @@ export default function downloadAsImage(
   isExactSelector = false,
 ) {
   return (event: SyntheticEvent) => {
-
     console.log('downloadAsImage', selector, description, isExactSelector);
 
     const elementToPrint = isExactSelector

@@ -123,7 +123,6 @@ const RowLevelSecurityList = lazy(
     ),
 );
 
-
 const Assistant = lazy(
   () => import(/* webpackChunkName: "Assistant" */ 'src/pages/Assistant'),
 );

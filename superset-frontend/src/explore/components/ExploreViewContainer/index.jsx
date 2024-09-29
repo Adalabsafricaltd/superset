@@ -64,14 +64,13 @@ import * as exploreActions from 'src/explore/actions/exploreActions';
 import * as saveModalActions from 'src/explore/actions/saveModalActions';
 import { useTabId } from 'src/hooks/useTabId';
 import withToasts from 'src/components/MessageToasts/withToasts';
+import ChartControlsPeek from 'src/pages/Assistant/ChartControlsPeek';
 import ExploreChartPanel from '../ExploreChartPanel';
 import ConnectedControlPanelsContainer from '../ControlPanelsContainer';
 import SaveModal from '../SaveModal';
 import DataSourcePanel from '../DatasourcePanel';
 import ConnectedExploreChartHeader from '../ExploreChartHeader';
 import ExploreContainer from '../ExploreContainer';
-import ChartControlsPeek from 'src/pages/Assistant/ChartControlsPeek';
-import { actions } from 'react-table';
 
 const propTypes = {
   ...ExploreChartPanel.propTypes,
@@ -247,7 +246,7 @@ function setSidebarWidths(key, dimension) {
 }
 
 function ExploreViewContainer(props) {
-  console.log('ExploreViewContainer', props)
+  console.log('ExploreViewContainer', props);
   const dynamicPluginContext = usePluginContext();
   const dynamicPlugin = dynamicPluginContext.dynamicPlugins[props.vizType];
   const isDynamicPluginLoading = dynamicPlugin && dynamicPlugin.mounting;
@@ -545,7 +544,6 @@ function ExploreViewContainer(props) {
   }, [props.controls]);
 
   function renderChartContainer() {
-    const logProps = {...props}
     return (
       <ExploreChartPanel
         {...props}
@@ -560,171 +558,169 @@ function ExploreViewContainer(props) {
     return renderChartContainer();
   }
 
- 
-
-
   return (
-    <div style={{
-      height: '100%',
-      minHeight: '0'
-    }} >
+    <div
+      style={{
+        height: '100%',
+        minHeight: '0',
+      }}
+    >
       <ExploreContainer>
-      <ConnectedExploreChartHeader
-        actions={props.actions}
-        canOverwrite={props.can_overwrite}
-        canDownload={props.can_download}
-        dashboardId={props.dashboardId}
-        isStarred={props.isStarred}
-        slice={props.slice}
-        sliceName={props.sliceName}
-        table_name={props.table_name}
-        formData={props.form_data}
-        chart={props.chart}
-        ownState={props.ownState}
-        user={props.user}
-        reports={props.reports}
-        saveDisabled={errorMessage || props.chart.chartStatus === 'loading'}
-        metadata={props.metadata}
-      />
-      <ExplorePanelContainer id="explore-container">
-        <Global
-          styles={css`
-            .navbar {
-              margin-bottom: 0;
-            }
-            body {
-              height: 100vh;
-              max-height: 100vh;
-              overflow: hidden;
-            }
-            #app-menu,
-            #app {
-              flex: 1 1 auto;
-            }
-            #app {
-              flex-basis: 100%;
-              overflow: hidden;
-              height: 100%;
-            }
-            #app-menu {
-              flex-shrink: 0;
-            }
-          `}
+        <ConnectedExploreChartHeader
+          actions={props.actions}
+          canOverwrite={props.can_overwrite}
+          canDownload={props.can_download}
+          dashboardId={props.dashboardId}
+          isStarred={props.isStarred}
+          slice={props.slice}
+          sliceName={props.sliceName}
+          table_name={props.table_name}
+          formData={props.form_data}
+          chart={props.chart}
+          ownState={props.ownState}
+          user={props.user}
+          reports={props.reports}
+          saveDisabled={errorMessage || props.chart.chartStatus === 'loading'}
+          metadata={props.metadata}
         />
-        <Resizable
-          onResizeStop={(evt, direction, ref, d) => {
-            setWidth(ref.getBoundingClientRect().width);
-            setSidebarWidths(LocalStorageKeys.DatasourceWidth, d);
-          }}
-          defaultSize={{
-            width: getSidebarWidths(LocalStorageKeys.DatasourceWidth),
-            height: '100%',
-          }}
-          minWidth={defaultSidebarsWidth[LocalStorageKeys.DatasourceWidth]}
-          maxWidth="33%"
-          enable={{ right: true }}
-          className={
-            isCollapsed ? 'no-show' : 'explore-column data-source-selection'
-          }
-        >
-          <div className="title-container">
-            <span className="horizontal-text">{t('Chart Source')}</span>
-            <span
-              role="button"
-              tabIndex={0}
-              className="action-button"
-              onClick={toggleCollapse}
-            >
-              <Icons.Expand
-                className="collapse-icon"
-                iconColor={theme.colors.primary.base}
-                iconSize="l"
-              />
-            </span>
-          </div>
-          <DataSourcePanel
-            formData={props.form_data}
-            datasource={props.datasource}
-            controls={props.controls}
-            actions={props.actions}
-            width={width}
-            user={props.user}
+        <ExplorePanelContainer id="explore-container">
+          <Global
+            styles={css`
+              .navbar {
+                margin-bottom: 0;
+              }
+              body {
+                height: 100vh;
+                max-height: 100vh;
+                overflow: hidden;
+              }
+              #app-menu,
+              #app {
+                flex: 1 1 auto;
+              }
+              #app {
+                flex-basis: 100%;
+                overflow: hidden;
+                height: 100%;
+              }
+              #app-menu {
+                flex-shrink: 0;
+              }
+            `}
           />
-        </Resizable>
-        {isCollapsed ? (
-          <div
-            className="sidebar"
-            onClick={toggleCollapse}
-            data-test="open-datasource-tab"
-            role="button"
-            tabIndex={0}
+          <Resizable
+            onResizeStop={(evt, direction, ref, d) => {
+              setWidth(ref.getBoundingClientRect().width);
+              setSidebarWidths(LocalStorageKeys.DatasourceWidth, d);
+            }}
+            defaultSize={{
+              width: getSidebarWidths(LocalStorageKeys.DatasourceWidth),
+              height: '100%',
+            }}
+            minWidth={defaultSidebarsWidth[LocalStorageKeys.DatasourceWidth]}
+            maxWidth="33%"
+            enable={{ right: true }}
+            className={
+              isCollapsed ? 'no-show' : 'explore-column data-source-selection'
+            }
           >
-            <span role="button" tabIndex={0} className="action-button">
-              <Tooltip title={t('Open Datasource tab')}>
-                <Icons.Collapse
+            <div className="title-container">
+              <span className="horizontal-text">{t('Chart Source')}</span>
+              <span
+                role="button"
+                tabIndex={0}
+                className="action-button"
+                onClick={toggleCollapse}
+              >
+                <Icons.Expand
                   className="collapse-icon"
                   iconColor={theme.colors.primary.base}
                   iconSize="l"
                 />
-              </Tooltip>
-            </span>
+              </span>
+            </div>
+            <DataSourcePanel
+              formData={props.form_data}
+              datasource={props.datasource}
+              controls={props.controls}
+              actions={props.actions}
+              width={width}
+              user={props.user}
+            />
+          </Resizable>
+          {isCollapsed ? (
+            <div
+              className="sidebar"
+              onClick={toggleCollapse}
+              data-test="open-datasource-tab"
+              role="button"
+              tabIndex={0}
+            >
+              <span role="button" tabIndex={0} className="action-button">
+                <Tooltip title={t('Open Datasource tab')}>
+                  <Icons.Collapse
+                    className="collapse-icon"
+                    iconColor={theme.colors.primary.base}
+                    iconSize="l"
+                  />
+                </Tooltip>
+              </span>
+            </div>
+          ) : null}
+          <Resizable
+            onResizeStop={(evt, direction, ref, d) =>
+              setSidebarWidths(LocalStorageKeys.ControlsWidth, d)
+            }
+            defaultSize={{
+              width: getSidebarWidths(LocalStorageKeys.ControlsWidth),
+              height: '100%',
+            }}
+            minWidth={defaultSidebarsWidth[LocalStorageKeys.ControlsWidth]}
+            maxWidth="33%"
+            enable={{ right: true }}
+            className="col-sm-3 explore-column controls-column"
+          >
+            <ConnectedControlPanelsContainer
+              exploreState={props.exploreState}
+              actions={props.actions}
+              form_data={props.form_data}
+              controls={props.controls}
+              chart={props.chart}
+              datasource_type={props.datasource_type}
+              isDatasourceMetaLoading={props.isDatasourceMetaLoading}
+              onQuery={onQuery}
+              onStop={onStop}
+              canStopQuery={props.can_add || props.can_overwrite}
+              errorMessage={errorMessage}
+              chartIsStale={chartIsStale}
+            />
+          </Resizable>
+          <div
+            className={cx(
+              'main-explore-content',
+              isCollapsed ? 'col-sm-9' : 'col-sm-7',
+            )}
+          >
+            {renderChartContainer()}
           </div>
-        ) : null}
-        <Resizable
-          onResizeStop={(evt, direction, ref, d) =>
-            setSidebarWidths(LocalStorageKeys.ControlsWidth, d)
-          }
-          defaultSize={{
-            width: getSidebarWidths(LocalStorageKeys.ControlsWidth),
-            height: '100%',
-          }}
-          minWidth={defaultSidebarsWidth[LocalStorageKeys.ControlsWidth]}
-          maxWidth="33%"
-          enable={{ right: true }}
-          className="col-sm-3 explore-column controls-column"
-        >
-          <ConnectedControlPanelsContainer
-            exploreState={props.exploreState}
+        </ExplorePanelContainer>
+        {props.isSaveModalVisible && (
+          <SaveModal
+            addDangerToast={props.addDangerToast}
             actions={props.actions}
             form_data={props.form_data}
-            controls={props.controls}
-            chart={props.chart}
-            datasource_type={props.datasource_type}
-            isDatasourceMetaLoading={props.isDatasourceMetaLoading}
-            onQuery={onQuery}
-            onStop={onStop}
-            canStopQuery={props.can_add || props.can_overwrite}
-            errorMessage={errorMessage}
-            chartIsStale={chartIsStale}
+            sliceName={props.sliceName}
+            dashboardId={props.dashboardId}
           />
-        </Resizable>
-        <div
-          className={cx(
-            'main-explore-content',
-            isCollapsed ? 'col-sm-9' : 'col-sm-7',
-          )}
-        >
-          {renderChartContainer()}
-        </div>
-      </ExplorePanelContainer>
-      {props.isSaveModalVisible && (
-        <SaveModal
-          addDangerToast={props.addDangerToast}
-          actions={props.actions}
-          form_data={props.form_data}
-          sliceName={props.sliceName}
-          dashboardId={props.dashboardId}
-        />
-      )}
-    </ExploreContainer>
-    {/* button in bottom left corner */}
-     <ChartControlsPeek {...{
-      ...props,
-      actions: {
-        ...props.actions,
-        onQuery:onQuery
-      }
-     }} />
+        )}
+      </ExploreContainer>
+      <ChartControlsPeek
+        {...props}
+        actions={{
+          ...props.actions,
+          onQuery,
+        }}
+      />
     </div>
   );
 }
@@ -737,7 +733,7 @@ const retainQueryModeRequirements = hiddenFormData =>
   );
 
 function mapStateToProps(state) {
-  console.log('ExploreViewContainer mapStateToProps state:', state)
+  console.log('ExploreViewContainer mapStateToProps state:', state);
   const {
     explore,
     charts,
@@ -747,7 +743,7 @@ function mapStateToProps(state) {
     reports,
     user,
     saveModal,
-    assistant
+    assistant,
   } = state;
   const { controls, slice, datasource, metadata, hiddenFormData } = explore;
   const hasQueryMode = !!controls.query_mode?.value;
@@ -770,7 +766,7 @@ function mapStateToProps(state) {
   }
 
   return {
-    assistant:assistant || {
+    assistant: assistant || {
       enabled: false,
     },
     isDatasourceMetaLoading: explore.isDatasourceMetaLoading,

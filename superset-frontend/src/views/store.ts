@@ -170,7 +170,10 @@ export function setupStore({
     },
     middleware: getMiddleware,
     devTools: process.env.WEBPACK_MODE === 'development' && !disableDebugger,
-    enhancers: [persistSqlLabStateEnhancer as StoreEnhancer, persistAssistantStateEnhancer as StoreEnhancer],
+    enhancers: [
+      persistSqlLabStateEnhancer as StoreEnhancer,
+      persistAssistantStateEnhancer as StoreEnhancer,
+    ],
     ...overrides,
   });
 }

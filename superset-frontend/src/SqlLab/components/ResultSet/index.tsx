@@ -269,7 +269,6 @@ const ResultSet = ({
     const openInNewWindow = clickEvent.metaKey;
     logAction(LOG_ACTIONS_SQLLAB_CREATE_CHART, {});
     if (results?.query_id) {
-
       console.log('ResultSet create chart:', {
         ...EXPLORE_CHART_DEFAULT,
         datasource: `${results.query_id}__query`,
@@ -728,7 +727,6 @@ const ResultSet = ({
   const progressMsg = query?.extra?.progress ?? null;
 
   return (
-    
     <ResultlessStyles>
       <div>{!progressBar && <Loading position="normal" />}</div>
       {/* show loading bar whenever progress bar is completed but needs time to render */}

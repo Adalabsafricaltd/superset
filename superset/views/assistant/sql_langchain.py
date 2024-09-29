@@ -10,6 +10,7 @@ from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from flask import current_app
 from langchain.agents.agent_types import AgentType
+import random
 
 from pydantic import BaseModel, Field
 from langchain_core.output_parsers.pydantic import PydanticOutputParser
@@ -50,7 +51,7 @@ class SQLLangchain:
         return self.isValidDatabase
     
     def initialize(self):
-        # Setup
+        # Setup 
         self.db = SQLDatabase.from_uri(self.dbSqlAlchemyUriDecrypted)
         self.llm = ChatOllama(
             base_url="http://41.215.4.194:11434",
@@ -74,7 +75,7 @@ class SQLLangchain:
         return None
 
 
-    def explain_describe(self, allowed_scope, target):
+    def explain_describe(self, target):
         """
         allowed_scope -> [ {
             schemaName: str,
@@ -98,11 +99,44 @@ class SQLLangchain:
             ... any additional data 
         }
         """
-        return None
+        
+        test_response = {
+                    "description": f"This table {target}",
+                    "columns": [
+                        {
+                            "columnName": "product_id",
+                            "description": "Unique identifier for each product"
+                        },
+                        {
+                            "columnName": "product_name",
+                            "description": "Name of the product"
+                        },
+                        {
+                            "columnName": "category",
+                            "description": "Category of the product"
+                        },
+                        {
+                            "columnName": "sales_amount",
+                            "description": "Total sales amount for the product"
+                        },
+                        {
+                            "columnName": "sale_date",
+                            "description": "Date of the sale"
+                        }
+                    ],
+                    "additional_data": {
+                        "total_products": 1000,
+                        "last_updated": "2023-06-15"
+                    }
+                }
+        
+        return test_response
 
-    # Chat
+    def explain_image(self, image, additional_data):
+
+        return None
     
-    def prompt(self, allowed_scope, user_prompt):
+    def prompt(self, allowed_scope, history, user_prompt):
         """Return schema
         {
             ai_response: str||markup,
@@ -117,7 +151,44 @@ class SQLLangchain:
 
         }
         """
-        return None
+
+        test_responses = [
+             {
+                "ai_response": "Here's a breakdown of sales by product category:"
+            },
+            {
+                "ai_response": "Here's a breakdown of sales by product category:",
+                "sql_query": "SELECT category, SUM(sales) FROM products GROUP BY category"
+            },
+            {
+                "ai_response": "Let's analyze customer demographics:",
+                "sql_query": "SELECT age_group, COUNT(*) FROM customers GROUP BY age_group",
+                "viz_type": [
+                    {
+                        "viz_type": "pie",
+                        "instructions": "Use age_group as dimension and COUNT(*) as metric",
+                        "viz_title": "Customer Age Distribution"
+                    }
+                ]
+            },
+            {
+                "ai_response": "Here's a trend of monthly revenue:",
+                "sql_query": "SELECT DATE_TRUNC('month', order_date) as month, SUM(total_amount) FROM orders GROUP BY month ORDER BY month",
+                "viz_type": [
+                    {
+                        "viz_type": "line",
+                        "instructions": "Use month as dimension and SUM(total_amount) as metric",
+                        "viz_title": "Monthly Revenue Trend"
+                    }
+                ]
+            },
+            {
+                "ai_response": "Let's compare product performance:"
+            }
+        ]
+        
+        test_response = random.choice(test_responses)
+        return test_response
     
     def viz_suggestion(self, allowed_scope, goal_or_intent, number_of_suggestions=4):
         """Return schema

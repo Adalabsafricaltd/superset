@@ -29,9 +29,6 @@ import {
 
 import * as SECTIONS from 'src/explore/controlPanels/sections';
 
-// TODO REMOVE
-import { inspect } from 'util'
-
 const getMemoizedSectionsToRender = memoizeOne(
   (datasourceType: DatasourceType, controlPanelConfig: ControlPanelConfig) => {
     const {
@@ -88,34 +85,11 @@ const getMemoizedSectionsToRender = memoizeOne(
  * Get the clean and processed control panel sections
  */
 
-
 export function getSectionsToRender(
   vizType: string,
   datasourceType: DatasourceType,
 ) {
   const controlPanelConfig =
-    // TODO: update `chartControlPanelRegistry` type to use ControlPanelConfig
     (getChartControlPanelRegistry().get(vizType) as ControlPanelConfig) || {};
-  console.log('<====> ^ datasourceType', datasourceType);
-  console.log('<====> ^ vizType', vizType);
-  // console.log('<====> ^ controlPanelConfig', JSON.stringify(controlPanelConfig.controlPanelSections));
-
-  // saveStringToFile(JSON.stringify(getChartControlPanelRegistry().get), './superset-frontend/src/assets/jsons/output.json');
   return getMemoizedSectionsToRender(datasourceType, controlPanelConfig);
 }
-
-function saveStringToFile(stringData:any, filename:any) {
-  const blob = new Blob([stringData], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-
-  const   
-a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-

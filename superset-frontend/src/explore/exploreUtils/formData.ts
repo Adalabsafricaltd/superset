@@ -75,7 +75,7 @@ export const postFormData = (
       formData,
       chartId,
     ),
-  }).then(r => r.json.key)
+  }).then(r => r.json.key);
 
 export const putFormData = (
   datasourceId: number,
