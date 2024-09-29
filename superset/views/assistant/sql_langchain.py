@@ -133,14 +133,28 @@ class SQLLangchain:
         return test_response
 
     def explain_image(self, image, additional_data):
-
-        return None
+        """ Return Schema
+        {
+            analysis: str,
+            insights: str,
+            recommendations: str,
+            take_away: str
+        }
+        """
+        test_response = {
+                    "analysis": "Sample analysis",
+                    "insights": "Sample insights",
+                    "recommendations": "Sample Recommendation",
+                    "take_away": "Sample Take Away"
+                }
+        
+        return test_response
     
     def prompt(self, allowed_scope, history, user_prompt):
         """Return schema
         {
             ai_response: str||markup,
-            sql_query: str
+            sql_query: str,
             viz_type:[
                 {
                     viz_type: str,

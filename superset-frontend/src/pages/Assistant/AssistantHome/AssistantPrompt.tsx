@@ -29,6 +29,7 @@ export class AssistantPrompt extends PureComponent<
       ...props,
       prompt: '',
       isLoading: false,
+      conversation: []
     };
   }
 
@@ -64,14 +65,13 @@ export class AssistantPrompt extends PureComponent<
       this.props.actions.updatePromptResponse(promptId, {
         message: ai_response,
         sql_query: sql_query || '',
-        viz_type,
+        viz_type: viz_type || [],
         can_be_visualized: viz_type ? 'true' : 'false',
       });
+      this.setState({prompt: ''})
     }
-
-    this.setState({ isLoading: false, prompt: '' });
+    this.setState({ isLoading: false});
   };
-
   handlePromptInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     this.setState({ prompt: event.target.value });
     console.log(event.target.value);

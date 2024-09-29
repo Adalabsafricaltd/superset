@@ -4,6 +4,7 @@ import { DatasourceProps } from './ContextBuilder/Datasource';
 import { DatasourceTableProps } from './ContextBuilder/DatasourceTable';
 import { DatasourceSchemaProps } from './ContextBuilder/DatasourceSchema';
 import { ChatMessageProps } from './ChatMessages/ChatMessage';
+import { string } from 'yargs';
 
 export type Descriptions = {
   description?: string;
@@ -178,6 +179,8 @@ export function getChartControlValues(
   }).then(({ json }) => {
     console.log('assistantUtils getChartControlValues Response:', json);
     return json;
+  }).catch(error => {
+    console.log('assistantUtils getChartControlValues Error:', error)
   });
 }
 
@@ -194,10 +197,6 @@ export function getChartExplanation(
     form_data: form_data,
     image: image,
   };
-  console.log(
-    'assistantUtils getChartExplanation data',
-    JSON.stringify(datasource),
-  );
   return SupersetClient.post({
     endpoint: endpoint,
     body: JSON.stringify(data),
@@ -251,7 +250,11 @@ export function assistantPrompt(
   context: DatasourceProps,
   conversation: ChatMessageProps[],
   prompt: string,
-) {
+): Promise<{
+  ai_response: string,
+  sql_query?: string,
+  viz_type?: any[]
+}> {
   const endpoint = 'assistant/prompt';
   const data: PromptPayload = {
     databaseId: context.id,
@@ -287,14 +290,17 @@ export function assistantPrompt(
   })
     .then(({ json }) => {
       console.log('assistantPrompt prompt Response:', json);
-      return json;
+      return json as {
+        ai_response: string,
+        sql_query?: string,
+        viz_type?: any[]
+      };
     })
     .catch(error => {
       console.error('assistantPrompt prompt Error:', error);
       throw error;
     });
 }
-
 export function nextQuestion(
   conversation: {
     question: string;

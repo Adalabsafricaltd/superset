@@ -22,7 +22,7 @@ export function ChartExplainer(props: any) {
 
   const [isOpen, setIsOpen] = useState(false);
   const [chartImage, setChartImage] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [description, setDescription] = useState<{
     analysis?: string;
     insights?: string;
@@ -111,10 +111,10 @@ export function ChartExplainer(props: any) {
                 <img src={chartImage} alt="Chart" width={'100%'} />
                 {!isLoading && (
                   <>
-                    <div>
+                    { description.analysis && (<div>
                       <h4>Analysis</h4>
                       <p>{description.analysis}</p>
-                    </div>
+                    </div>) }
                   </>
                 )}
               </>
@@ -128,36 +128,50 @@ export function ChartExplainer(props: any) {
               maxWidth: '40%',
             }}
           >
-            {isLoading && <Spin />}
+            {isLoading && (
+              <div
+                style={{
+                  margin: '30px'
+                }}
+              >
+                <Spin />
+              </div>
+            )}
             {!isLoading && (
               <>
-                <div>
-                  <h4>Insights</h4>
-                  <p>{description.insights}</p>
-                </div>
-                <div>
-                  <h4>Recommendations</h4>
-                  <p>{description.recommendations}</p>
-                </div>
-                <div>
-                  <h4>Takeaway</h4>
-                  <p>{description.take_away}</p>
-                </div>
+                {description.insights && (
+                  <div>
+                    <h4>Insights</h4>
+                    <p>{description.insights}</p>
+                  </div>
+                )}
+                {description.recommendations && (
+                  <div>
+                    <h4>Recommendations</h4>
+                    <p>{description.recommendations}</p>
+                  </div>
+                )}
+                {description.take_away && (
+                  <div>
+                    <h4>Takeaway</h4>
+                    <p>{description.take_away}</p>
+                  </div>
+                )}
               </>
             )}
           </div>
         </div>
 
         {/* <textarea
-                    value={JSON.stringify(formDataLcl, null, 2)}
-                    onChange={handleTextareaChange} // Add the textarea change handler
-                    style={{
-                        width: '100%',
-                        height: 'auto',
-                        minHeight: '400px',
-                        marginTop: '10px'
-                    }}
-                /> */}
+                  value={JSON.stringify(formDataLcl, null, 2)}
+                  onChange={handleTextareaChange} // Add the textarea change handler
+                  style={{
+                      width: '100%',
+                      height: 'auto',
+                      minHeight: '400px',
+                      marginTop: '10px'
+                  }}
+              /> */}
       </Modal>
 
       {/* // button with icon /static/assets/images/assistant_logo_b_w.svg */}
