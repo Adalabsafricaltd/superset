@@ -8,16 +8,11 @@ from flask_appbuilder.models.sqla.interface import SQLAInterface
 from superset.models.core import Database
 from flask import current_app
 from flask import request
-import uuid
 import logging
-import os
-import base64
 from superset.views.assistant.support import AssistantSupport
 from superset.views.assistant.sql_langchain import SQLLangchain
+from superset.views.assistant.sql_langchain2 import SQLQueryHandler
 from superset.views.assistant.context_chain import ContextQuestionnaire
-from superset.daos.database import DatabaseDAO
-from superset.commands.database.exceptions import DatabaseNotFoundError
-from typing import cast
 from superset.models.core import Database
 
 class AssistantView(BaseSupersetView):
@@ -145,6 +140,12 @@ class AssistantView(BaseSupersetView):
             raise Exception(f"Database ID {databaseId} is invalid")
         response = sqlLang.prompt(allowed_scope,history,prompt)
         # self.logger.info(f"Response: {response}")
+        # sqlLang = SQLQueryHandler(databaseId)
+        # if not sqlLang.isValidDatabase:
+        #     raise Exception(f"Database ID {databaseId} is invalid")
+        
+        # response = sqlLang.handle_query(prompt)
+
         return self.json_response(response)
     
     

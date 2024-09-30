@@ -1,19 +1,14 @@
 from superset.daos.database import DatabaseDAO
-from superset.commands.database.exceptions import DatabaseNotFoundError
 from typing import cast
 from superset.models.core import Database
 import logging
 from langchain_community.utilities import SQLDatabase
-from langchain_ollama import ChatOllama
-from langchain_community.agent_toolkits import create_sql_agent, SQLDatabaseToolkit
-from langchain_core.messages import HumanMessage
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_ollama.llms import OllamaLLM
+from langchain.agents import create_sql_agent
+from langchain_core.prompts import PromptTemplate
 from flask import current_app
 from langchain.agents.agent_types import AgentType
-import random
 
-from pydantic import BaseModel, Field
-from langchain_core.output_parsers.pydantic import PydanticOutputParser
 
 # class MessageOutput(BaseModel):
 #     message: str = Field(description="The message from the agent")
@@ -53,18 +48,22 @@ class SQLLangchain:
     def initialize(self):
         # Setup 
         self.db = SQLDatabase.from_uri(self.dbSqlAlchemyUriDecrypted)
-        self.llm = ChatOllama(
+        self.llm = OllamaLLM(
             base_url="http://41.215.4.194:11434",
             model="llama3.1",
             verbose=True,
             temperature=0
         )
-        
+
         # Agent
         _agent = create_sql_agent(
             llm=self.llm,
             db=self.db,
             agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+            verbose=True,
+            agent_executor_kwargs={
+                "handle_parsing_errors": True
+            }
         )
         return _agent
     
@@ -76,19 +75,8 @@ class SQLLangchain:
 
 
     def explain_describe(self, target):
+        self.logger.info(f"sql langchain explain_describe {target}")
         """
-        allowed_scope -> [ {
-            schemaName: str,
-            tables: [{
-                tableName: str,
-                columns: [{
-                    columnName: str,
-                    dataType: str,
-                    key: str
-                }]
-            }]
-        } ]
-        target -> table in allowed scope
         Return schema
         {
             description: str
@@ -99,38 +87,24 @@ class SQLLangchain:
             ... any additional data 
         }
         """
+        instructions = f"""
+        Describe the table or view named '{target}' in detail. For each column in '{target}', provide its name and a brief description of its contents or purpose. Format the response as a JSON object with the following structure:
+        {{
+            "description": "A brief description of the entire table or view",
+            "columns": [
+                {{
+                    "columnName": "Name of the column",
+                    "description": "Description of the column's contents or purpose"
+                }},
+                ...
+            ]
+        }}
+        Ensure the response is a valid JSON object.
+        """
         
-        test_response = {
-                    "description": f"This table {target}",
-                    "columns": [
-                        {
-                            "columnName": "product_id",
-                            "description": "Unique identifier for each product"
-                        },
-                        {
-                            "columnName": "product_name",
-                            "description": "Name of the product"
-                        },
-                        {
-                            "columnName": "category",
-                            "description": "Category of the product"
-                        },
-                        {
-                            "columnName": "sales_amount",
-                            "description": "Total sales amount for the product"
-                        },
-                        {
-                            "columnName": "sale_date",
-                            "description": "Date of the sale"
-                        }
-                    ],
-                    "additional_data": {
-                        "total_products": 1000,
-                        "last_updated": "2023-06-15"
-                    }
-                }
-        
-        return test_response
+        result = self.agent.invoke(instructions)
+        self.logger.info(f"sql langchain explain_describe {result}")
+        return result
 
     def explain_image(self, image, additional_data):
         """ Return Schema
@@ -165,44 +139,9 @@ class SQLLangchain:
 
         }
         """
-
-        test_responses = [
-             {
-                "ai_response": "Here's a breakdown of sales by product category:"
-            },
-            {
-                "ai_response": "Here's a breakdown of sales by product category:",
-                "sql_query": "SELECT category, SUM(sales) FROM products GROUP BY category"
-            },
-            {
-                "ai_response": "Let's analyze customer demographics:",
-                "sql_query": "SELECT age_group, COUNT(*) FROM customers GROUP BY age_group",
-                "viz_type": [
-                    {
-                        "viz_type": "pie",
-                        "instructions": "Use age_group as dimension and COUNT(*) as metric",
-                        "viz_title": "Customer Age Distribution"
-                    }
-                ]
-            },
-            {
-                "ai_response": "Here's a trend of monthly revenue:",
-                "sql_query": "SELECT DATE_TRUNC('month', order_date) as month, SUM(total_amount) FROM orders GROUP BY month ORDER BY month",
-                "viz_type": [
-                    {
-                        "viz_type": "line",
-                        "instructions": "Use month as dimension and SUM(total_amount) as metric",
-                        "viz_title": "Monthly Revenue Trend"
-                    }
-                ]
-            },
-            {
-                "ai_response": "Let's compare product performance:"
-            }
-        ]
-        
-        test_response = random.choice(test_responses)
-        return test_response
+        response = self.agent.invoke(user_prompt)
+        self.logger.info(f"sql_langchain prompt {response}")
+        return response
     
     def viz_suggestion(self, allowed_scope, goal_or_intent, number_of_suggestions=4):
         """Return schema

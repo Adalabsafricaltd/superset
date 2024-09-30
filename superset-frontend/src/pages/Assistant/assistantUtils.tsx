@@ -4,7 +4,6 @@ import { DatasourceProps } from './ContextBuilder/Datasource';
 import { DatasourceTableProps } from './ContextBuilder/DatasourceTable';
 import { DatasourceSchemaProps } from './ContextBuilder/DatasourceSchema';
 import { ChatMessageProps } from './ChatMessages/ChatMessage';
-import { string } from 'yargs';
 
 export type Descriptions = {
   description?: string;
@@ -15,13 +14,13 @@ export type Descriptions = {
 };
 
 export const getTableDescription = async (
-  databseId: any,
+  databaseId: any,
   schema: string,
   table: string,
 ) => {
   const endpoint = 'assistant/table';
   const request = {
-    databseId: databseId,
+    databaseId: databaseId,
     schema: schema,
     table_name: table,
   };
