@@ -4,11 +4,26 @@ from superset.models.core import Database
 import logging
 from langchain_community.utilities import SQLDatabase
 from langchain_ollama.llms import OllamaLLM
-from langchain.agents import create_sql_agent
-from langchain_core.prompts import PromptTemplate
+from langchain_community.agent_toolkits.sql.base import create_sql_agent
 from flask import current_app
 from langchain.agents.agent_types import AgentType
 
+from langchain.output_parsers import PydanticOutputParser
+from pydantic import BaseModel, Field
+from typing import List
+
+# Formating Structures
+# Prompt Response
+
+class VizType(BaseModel):
+    viz_type: str = Field(description="Type of visualization")
+    instructions: str = Field(description="Instructions for metrics, dimensions, metric labels, filters, etc.")
+    viz_title: str = Field(description="Title of the chart")
+
+class PromptResponse(BaseModel):
+    ai_response: str = Field(description="AI response or markup")
+    sql_query: str = Field(description="SQL query used")
+    viz_type: List[VizType] = Field(description="List of visualization types")
 
 # class MessageOutput(BaseModel):
 #     message: str = Field(description="The message from the agent")
@@ -50,7 +65,7 @@ class SQLLangchain:
         self.db = SQLDatabase.from_uri(self.dbSqlAlchemyUriDecrypted)
         self.llm = OllamaLLM(
             base_url="http://41.215.4.194:11434",
-            model="llama3.1",
+            model="zephyr",
             verbose=True,
             temperature=0
         )
@@ -63,7 +78,8 @@ class SQLLangchain:
             verbose=True,
             agent_executor_kwargs={
                 "handle_parsing_errors": True
-            }
+            },
+            max_iterations=30
         )
         return _agent
     
@@ -88,7 +104,9 @@ class SQLLangchain:
         }
         """
         instructions = f"""
-        Describe the table or view named '{target}' in detail. For each column in '{target}', provide its name and a brief description of its contents or purpose. Format the response as a JSON object with the following structure:
+        Describe the table or view named '{target}' in detail. For each column in '{target}', provide its name and a brief description of its contents or purpose. 
+        Ensure the response is a valid JSON object.
+        Format the response as a JSON object with the following structure:
         {{
             "description": "A brief description of the entire table or view",
             "columns": [
@@ -99,7 +117,7 @@ class SQLLangchain:
                 ...
             ]
         }}
-        Ensure the response is a valid JSON object.
+        
         """
         
         result = self.agent.invoke(instructions)
@@ -124,6 +142,10 @@ class SQLLangchain:
         
         return test_response
     
+   
+
+
+
     def prompt(self, allowed_scope, history, user_prompt):
         """Return schema
         {
@@ -139,9 +161,22 @@ class SQLLangchain:
 
         }
         """
-        response = self.agent.invoke(user_prompt)
-        self.logger.info(f"sql_langchain prompt {response}")
-        return response
+        parser = PydanticOutputParser(pydantic_object=PromptResponse)
+        format_instructions = parser.get_format_instructions()
+
+        prompt_with_format = f"""
+        You are a Data analyst. You may only access data from the schemas, tables and columns depicted in ALLOWED_SCOPE structure {allowed_scope}.
+        Answer the following user prompt using only the data available in the ALLOWED_SCOPE: If the the prompt referes to data outside the ALLOWED_SCOPE respond with 'I dont know'
+        User Prompt: {user_prompt}
+        Stop Thought when you have enough information to answer User Prompt
+        
+        """
+        self.logger.info(f"sql_langchain => prompt {prompt_with_format}")
+        response = self.agent.invoke(prompt_with_format)
+        self.logger.info(f"sql_langchain => response {response}")
+        parsed_response = parser.parse(response)
+        self.logger.info(f"sql_langchain => parsed {parsed_response}")
+        return parsed_response.dict()
     
     def viz_suggestion(self, allowed_scope, goal_or_intent, number_of_suggestions=4):
         """Return schema

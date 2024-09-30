@@ -1759,7 +1759,7 @@ ENVIRONMENT_TAG_CONFIG = {
         },
         "development": {
             "color": "error.base",
-            "text": "Development",
+            "text": "",
         },
         "production": {
             "color": "",

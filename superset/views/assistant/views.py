@@ -173,7 +173,7 @@ class AssistantView(BaseSupersetView):
         return self.json_response(response)
     
     # Api to interact with gemini and get visualization suggestions
-    @expose("/gemini/viz-suggestions", methods=["POST"])
+    @expose("/viz-suggestions", methods=["POST"])
     @safe
     def geminiViz(self) -> FlaskResponse:
         """ Request schema

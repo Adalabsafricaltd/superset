@@ -21,7 +21,7 @@ export const testProps: ContextBuilderProps = {
     },
     {
       step: 'Step 2',
-      description: 'Data selectiion',
+      description: 'Data selection',
       isDone: false,
     },
     {
