@@ -3,14 +3,14 @@ from typing import cast
 from superset.models.core import Database
 import logging
 from langchain_community.utilities import SQLDatabase
-from langchain_ollama.llms import OllamaLLM
-from langchain_community.agent_toolkits.sql.base import create_sql_agent
+from langchain_community.agent_toolkits import SQLDatabaseToolkit
+from langchain_ollama.chat_models import ChatOllama
 from flask import current_app
-from langchain.agents.agent_types import AgentType
-
 from langchain.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
 from typing import List
+from langgraph.prebuilt import create_react_agent
+from langchain_core.messages import SystemMessage, HumanMessage
 
 # Formating Structures
 # Prompt Response
@@ -43,7 +43,6 @@ class SQLLangchain:
     llm = None
     db = None
     geminiApiKey = current_app.config.get("GEMINI_API_KEY")
-    agent = None
     toolKit = None
 
     def __init__(self, dbPk: int):
@@ -55,7 +54,7 @@ class SQLLangchain:
             self.logger.info(f"Database => {self.dbPk} info: {database.sqlalchemy_uri_decrypted}")
             self.dbSqlAlchemyUriDecrypted = database.sqlalchemy_uri_decrypted
             self.isValidDatabase = True
-            self.agent = self.initialize()
+            self.initialize()
     
     def isValid(self):
         return self.isValidDatabase
@@ -63,23 +62,20 @@ class SQLLangchain:
     def initialize(self):
         # Setup 
         self.db = SQLDatabase.from_uri(self.dbSqlAlchemyUriDecrypted)
-        self.llm = OllamaLLM(
+        self.llm = ChatOllama(
             base_url="http://41.215.4.194:11434",
-            model="zephyr",
+            model="llama3.1",
             verbose=True,
             temperature=0
         )
+        self.toolKit = SQLDatabaseToolkit(db=self.db, llm=self.llm)
 
+    def new_agent(self, system_message):
         # Agent
-        _agent = create_sql_agent(
-            llm=self.llm,
-            db=self.db,
-            agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-            verbose=True,
-            agent_executor_kwargs={
-                "handle_parsing_errors": True
-            },
-            max_iterations=30
+        _agent = create_react_agent(
+            self.llm,
+            self.toolKit.get_tools(),
+            state_modifier=SystemMessage(system_message),
         )
         return _agent
     
@@ -164,19 +160,30 @@ class SQLLangchain:
         parser = PydanticOutputParser(pydantic_object=PromptResponse)
         format_instructions = parser.get_format_instructions()
 
-        prompt_with_format = f"""
-        You are a Data analyst. You may only access data from the schemas, tables and columns depicted in ALLOWED_SCOPE structure {allowed_scope}.
-        Answer the following user prompt using only the data available in the ALLOWED_SCOPE: If the the prompt referes to data outside the ALLOWED_SCOPE respond with 'I dont know'
-        User Prompt: {user_prompt}
-        Stop Thought when you have enough information to answer User Prompt
-        
+        instructions = f"""
+
+            You are an agent designed to interact with a SQL database.
+
+            Given an input question, create a syntactically correct SQL query to run, then look at the results of the query and return the answer.
+            You MUST ONLY query data in the ALLOWED_SCOPE : {allowed_scope}
+            You can order the results by a relevant column to return the most interesting examples in the database.
+            You have access to tools for interacting with the database.
+            Only use the below tools. Only use the information returned by the below tools to construct your final answer.
+            You MUST double check your query before executing it. If you get an error while executing a query, rewrite the query and try again.
+            You MUST check that your response is relevant to the input question and the database. 
+            You MUST give a reasoning to your answer.
+            DO NOT make any DML statements (INSERT, UPDATE, DELETE, DROP etc.) to the database.
+            To start you should ALWAYS look at the tables in the database to see what you can query.
+            Do NOT skip this step.
+            Then you should query the schema of the most relevant tables. 
+            {format_instructions}
         """
-        self.logger.info(f"sql_langchain => prompt {prompt_with_format}")
-        response = self.agent.invoke(prompt_with_format)
-        self.logger.info(f"sql_langchain => response {response}")
-        parsed_response = parser.parse(response)
-        self.logger.info(f"sql_langchain => parsed {parsed_response}")
-        return parsed_response.dict()
+        agent = self.new_agent(instructions)
+        RECURSION_LIMIT = 2 * 20 + 1
+        return agent.invoke(
+            {"messages": [HumanMessage(content=user_prompt)]},
+            {"recursion_limit": RECURSION_LIMIT},
+        )
     
     def viz_suggestion(self, allowed_scope, goal_or_intent, number_of_suggestions=4):
         """Return schema
