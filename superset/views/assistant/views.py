@@ -10,7 +10,7 @@ from flask import current_app
 from flask import request
 import logging
 from superset.views.assistant.support import AssistantSupport
-from superset.views.assistant.sql_langchain import SQLLangchain
+from superset.views.assistant.sql_langchain import SQLLangchain, PromptResponse
 from superset.views.assistant.sql_langchain2 import SQLQueryHandler
 from superset.views.assistant.context_chain import ContextQuestionnaire
 from superset.models.core import Database
@@ -139,7 +139,11 @@ class AssistantView(BaseSupersetView):
         if not sqlLang.isValid():
             raise Exception(f"Database ID {databaseId} is invalid")
         response = sqlLang.prompt(allowed_scope,history,prompt)
-        # self.logger.info(f"Response: {response}")
+        # response = response["messages"][-1].content
+        # response = PromptResponse.parse_obj(response)
+        self.logger.info(f"Response: {response}")
+        # for m in response:
+        #     self.logger.info(f"Response: {m}")
         # sqlLang = SQLQueryHandler(databaseId)
         # if not sqlLang.isValidDatabase:
         #     raise Exception(f"Database ID {databaseId} is invalid")

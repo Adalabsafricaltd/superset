@@ -10,7 +10,8 @@ from langchain.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
 from typing import List
 from langgraph.prebuilt import create_react_agent
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_core.utils.json import parse_json_markdown
 
 # Formating Structures
 # Prompt Response
@@ -21,9 +22,9 @@ class VizType(BaseModel):
     viz_title: str = Field(description="Title of the chart")
 
 class PromptResponse(BaseModel):
-    ai_response: str = Field(description="AI response or markup")
-    sql_query: str = Field(description="SQL query used")
-    viz_type: List[VizType] = Field(description="List of visualization types")
+    ai_response: str = Field(description="Your response to the human message. Can be simple string or markdown")
+    sql_query: str = Field(description="SQL query used else empty", default="")
+    # viz_type: List[VizType] = Field(description="List of visualization types else empty")
 
 # class MessageOutput(BaseModel):
 #     message: str = Field(description="The message from the agent")
@@ -63,8 +64,8 @@ class SQLLangchain:
         # Setup 
         self.db = SQLDatabase.from_uri(self.dbSqlAlchemyUriDecrypted)
         self.llm = ChatOllama(
-            base_url="http://41.215.4.194:11434",
-            model="llama3.1",
+            base_url="https://adamodels.datainviz.ai",
+            model="llama3.2:3b",
             verbose=True,
             temperature=0
         )
@@ -116,7 +117,10 @@ class SQLLangchain:
         
         """
         
-        result = self.agent.invoke(instructions)
+        result = self.new_agent(instructions).invoke(
+            {"messages": [HumanMessage(content=target)]},
+            {"recursion_limit": 2 * 20 + 1},
+        )
         self.logger.info(f"sql langchain explain_describe {result}")
         return result
 
@@ -159,31 +163,28 @@ class SQLLangchain:
         """
         parser = PydanticOutputParser(pydantic_object=PromptResponse)
         format_instructions = parser.get_format_instructions()
-
-        instructions = f"""
-
-            You are an agent designed to interact with a SQL database.
-
-            Given an input question, create a syntactically correct SQL query to run, then look at the results of the query and return the answer.
-            You MUST ONLY query data in the ALLOWED_SCOPE : {allowed_scope}
-            You can order the results by a relevant column to return the most interesting examples in the database.
-            You have access to tools for interacting with the database.
-            Only use the below tools. Only use the information returned by the below tools to construct your final answer.
-            You MUST double check your query before executing it. If you get an error while executing a query, rewrite the query and try again.
-            You MUST check that your response is relevant to the input question and the database. 
-            You MUST give a reasoning to your answer.
-            DO NOT make any DML statements (INSERT, UPDATE, DELETE, DROP etc.) to the database.
-            To start you should ALWAYS look at the tables in the database to see what you can query.
-            Do NOT skip this step.
-            Then you should query the schema of the most relevant tables. 
+        self.logger.info(f"Formatting {format_instructions}")
+        instructions = f"""  
+            Your name is Moesha an AI assistant Specializing in SQL queries.
+            Answer the human using the tools available to you.
+            Always return your Response to the human 
+            If your response can be queried from the database Provide the query
+            Always format your response as specified below
             {format_instructions}
         """
         agent = self.new_agent(instructions)
         RECURSION_LIMIT = 2 * 20 + 1
-        return agent.invoke(
-            {"messages": [HumanMessage(content=user_prompt)]},
+        response = agent.invoke(
+            {"messages": [("user",user_prompt)]},
             {"recursion_limit": RECURSION_LIMIT},
-        )
+        )["messages"][-1]
+        self.logger.info(f"Prompt Response: {response}")
+        # if contains json markdown
+        if "ai_response" in response.content:
+            return parse_json_markdown(response.content)
+        else:
+            self.logger.info(f"Not in format {response.to_json()}")
+            return PromptResponse(ai_response=response.content).model_dump()
     
     def viz_suggestion(self, allowed_scope, goal_or_intent, number_of_suggestions=4):
         """Return schema
