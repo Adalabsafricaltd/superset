@@ -169,7 +169,10 @@ class SQLLangchain:
             Answer the human using the tools available to you.
             Always return your Response to the human 
             If your response can be queried from the database Provide the query
-            Always format your response as specified below
+            
+            ALWAYS CHECK IF TABLE NAMES ARE CORRECT
+            ALWAYS CHECK IF COLUMN NAMES ARE CORRECT
+
             {format_instructions}
         """
         agent = self.new_agent(instructions)
